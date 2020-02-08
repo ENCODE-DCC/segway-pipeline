@@ -2,4 +2,6 @@
 .python-version
 .tox/
 .vscode/
+.coverage
 venv/
+__pycache__/
