@@ -1,0 +1,5 @@
+.mypy_cache/
+.python-version
+.tox/
+.vscode/
+venv/

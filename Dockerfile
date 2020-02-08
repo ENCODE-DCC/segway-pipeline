@@ -8,12 +8,14 @@ LABEL maintainer.email "encode-help@lists.stanford.edu"
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH /opt/conda/bin:$PATH
 
+# libkrb5-dev needed for bigWigToBedGraph generation during genomedata creation to work
 RUN apt-get update && apt-get install -y \
     bzip2 \
+    libkrb5-dev \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -q https://repo.anaconda.com/miniconda/Miniconda2-4.7.12.1-Linux-x86_64.sh -O ~/miniconda.sh && \
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh	 -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -21,3 +23,10 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda2-4.7.12.1-Linux-x86_64
     echo "conda activate base" >> ~/.bashrc
 
 RUN conda install -y -c bioconda segway segtools && conda clean -afy
+
+# It was a pain to try to get the conda-installed bigWigToBedGraph to work. Instead we
+# add the binary ourselves, and mask the conda installed binary. The conda resolver
+# didn't like me trying to upgrade the ucsc-bigwigtobedgraph to 377, got conflicts.
+# Possibly related: https://github.com/bioconda/bioconda-recipes/issues/14724
+COPY bin/* /utils/
+RUN echo "export PATH=/utils:$PATH" >> ~/.bashrc
