@@ -29,4 +29,6 @@ RUN conda install -y -c bioconda segway segtools && conda clean -afy
 # didn't like me trying to upgrade the ucsc-bigwigtobedgraph to 377, got conflicts.
 # Possibly related: https://github.com/bioconda/bioconda-recipes/issues/14724
 COPY bin/* /utils/
-RUN echo "export PATH=/utils:$PATH" >> ~/.bashrc
+COPY segway/* /software/
+
+RUN echo "export PATH=/utils:/software:$PATH" >> ~/.bashrc
