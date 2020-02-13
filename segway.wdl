@@ -1,5 +1,5 @@
-#CAPER docker quay.io/encode-dcc/segway@sha256:d61b57fc6790f57af784c9e3ad1129b5cf9b3fb458e166d8ed54242734fb6b8e
-#CAPER singularity docker://quay.io/encode-dcc/segway:@sha256:d61b57fc6790f57af784c9e3ad1129b5cf9b3fb458e166d8ed54242734fb6b8e
+#CAPER docker quay.io/encode-dcc/segway@sha256:9da51e6bcfd2e95f91c9c5d420c57d0e1b2828f3de7d060e070d450459cd3797
+#CAPER singularity docker://quay.io/encode-dcc/segway@sha256:9da51e6bcfd2e95f91c9c5d420c57d0e1b2828f3de7d060e070d450459cd3797
 
 workflow segway {
     Array[File] bigwigs
@@ -57,8 +57,8 @@ task segway_train_annotate {
     }
 
     runtime {
-        cpu: 8
-        memory: "16 GB"
+        cpu: 96
+        memory: "32 GB"
         disks: "local-disk 500 SSD"
     }
 }
