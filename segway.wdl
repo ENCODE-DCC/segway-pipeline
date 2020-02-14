@@ -5,6 +5,7 @@ workflow segway {
     Array[File] bigwigs
     File chrom_sizes
     File annotation_gff
+    Int num_segway_cpus = 96
 
     call make_genomedata { input:
         bigwigs = bigwigs,
@@ -12,7 +13,8 @@ workflow segway {
     }
 
     call segway_train_annotate { input:
-        genomedata = make_genomedata.genomedata
+        genomedata = make_genomedata.genomedata,
+        ncpus = num_segway_cpus,
     }
 
     call segtools { input:
@@ -43,13 +45,22 @@ task make_genomedata {
 
 task segway_train_annotate {
     File genomedata
+    Int ncpus
 
-    command {
+    command <<<
         export SEGWAY_RAND_SEED=112344321
+        export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
         mkdir traindir identifydir
-        segway train "${genomedata}" traindir
-        segway annotate "${genomedata}" --bed=segway.bed.gz traindir identifydir
-    }
+        segway train ${genomedata} traindir
+        segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
+        # See https://stackoverflow.com/a/54908072 . Want to make tar idempotent
+        echo traindir/{auxiliary,params/input.master,params/params.params,segway.str,triangulation} |
+            LC_ALL=C sort -z |
+            tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
+            --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
+            --no-recursion --null -T - -cf training_params.tar
+        gzip -nc training_params.tar > training_params.tar.gz
+    >>>
 
     output {
         File model_params = glob("traindir/params.params")[0]
@@ -57,7 +68,7 @@ task segway_train_annotate {
     }
 
     runtime {
-        cpu: 96
+        cpu: ncpus
         memory: "32 GB"
         disks: "local-disk 500 SSD"
     }
