@@ -1,0 +1,11 @@
+{
+  "default_runtime_attributes": {
+      "bootDiskSizeGb": "10",
+      "continueOnReturnCode": 0,
+      "docker": "quay.io/encode-dcc/segway@sha256:9da51e6bcfd2e95f91c9c5d420c57d0e1b2828f3de7d060e070d450459cd3797",
+      "failOnStderr": false,
+      "noAddress": "false",
+      "preemptible": "0",
+      "zones": "us-west1-a us-west1-b us-west1-c"
+  }
+}
