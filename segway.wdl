@@ -131,7 +131,7 @@ task segway_annotate {
 
     runtime {
         cpu: ncpus
-        memory: "32 GB"
+        memory: "128 GB"
         disks: "local-disk 500 SSD"
     }
 }
@@ -146,12 +146,18 @@ task segtools {
         segtools-length-distribution -o length_distribution ${segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
         segtools-aggregation --normalize -o feature_aggregation --mode region ${segway_output_bed} ${annotation_gff}
-        # TODO: add Tony's automated classification
+        # TODO: add SAGA
     }
 
     output {
         Array[File] length_distribution_info = glob("length_distribution/*")
         Array[File] gmtk_info = glob("gmtk_parameters/*")
         Array[File] feature_aggregation_info = glob("feature_aggregation/*")
+    }
+
+    runtime {
+        cpu: 8
+        memory: "16 GB"
+        disks: "local-disk 250 SSD"
     }
 }
