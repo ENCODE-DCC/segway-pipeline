@@ -35,4 +35,6 @@
       - id: debug-statements
       - id: check-json
       - id: pretty-format-json
+        args:
+          - --autofix
       - id: check-yaml

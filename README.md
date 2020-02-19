@@ -23,6 +23,8 @@ A pipeline to run [Segway](https://segway.hoffmanlab.org/) and [Segtools](https:
 
 ## Usage
 
+`cd` to the `segway` repository cloned in the installation, and run the following:
+
 ```bash
-$ caper run segway.wdl -i ${INPUT_JSON}
+$ caper run segway.wdl -i ${INPUT_JSON} -o workflow_opts/docker.json
 ```

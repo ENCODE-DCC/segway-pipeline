@@ -2,31 +2,57 @@
 #CAPER singularity docker://quay.io/encode-dcc/segway@sha256:9da51e6bcfd2e95f91c9c5d420c57d0e1b2828f3de7d060e070d450459cd3797
 
 workflow segway {
-    Array[File] bigwigs
-    File chrom_sizes
+    # Pipeline inputs to run from beginning
+    Array[File]? bigwigs
+    File? chrom_sizes
     File annotation_gff
+
+    # Pipeline resource parameter
     Int num_segway_cpus = 96
 
-    call make_genomedata { input:
-        bigwigs = bigwigs,
-        chrom_sizes = chrom_sizes
+    # Optional inputs for starting the pipeline not from the beginning
+    File? genomedata
+    File? segway_traindir
+    File? segway_output_bed
+    File? segway_params
+
+    Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes)
+    Boolean has_segtools_input = defined(segway_output_bed) && defined(segway_params)
+    # We need a genomedata for everything except segtools
+    if (!defined(genomedata) && !has_segtools_input && has_make_genomedata_input) {
+        call make_genomedata { input:
+            bigwigs = select_all([bigwigs])[0],
+            chrom_sizes = select_all([chrom_sizes])[0],
+        }
     }
 
-    call segway_train { input:
-        genomedata = make_genomedata.genomedata,
-        ncpus = num_segway_cpus,
+    File genomedata_ = select_first([genomedata, make_genomedata.genomedata])
+
+    # We can skip training if we have a traindir or if we just need to run segtools
+    if (!defined(segway_traindir) && !has_segtools_input) {
+        call segway_train { input:
+            genomedata = genomedata_,
+            ncpus = num_segway_cpus,
+        }
     }
 
-    call segway_annotate { input:
-        genomedata = make_genomedata.genomedata,
-        traindir = segway_train.traindir,
-        ncpus = num_segway_cpus,
+    File segway_traindir_ = select_first([segway_traindir, segway_train.traindir])
+
+    if (!has_segtools_input) {
+        call segway_annotate { input:
+            genomedata = genomedata_,
+            traindir = segway_traindir_,
+            ncpus = num_segway_cpus,
+        }
     }
+
+    File segway_output_bed_ = select_first([segway_output_bed, segway_annotate.output_bed])
+    File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
 
     call segtools { input:
-        segway_output_bed = segway_annotate.output_bed,
+        segway_output_bed = segway_output_bed_,
         annotation_gff = annotation_gff,
-        segway_params = segway_annotate.segway_params
+        segway_params = segway_params_,
     }
 }
 
