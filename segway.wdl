@@ -112,7 +112,7 @@ task segway_annotate {
         mkdir traindir && tar xf ${traindir} -C traindir --strip-components 1
         mkdir identifydir
         segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
-        find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master,params/params.params,segway.str,triangulation)($|/.*)' -print0 |
+        find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master|params/params.params|segway.str|triangulation)($|/.*)' -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
