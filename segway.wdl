@@ -106,7 +106,9 @@ task segway_annotate {
     File traindir
     Int ncpus
 
-    command <<<
+    command {
+        mkdir tmp
+        export TMPDIR="$PWD/tmp"
         export SEGWAY_RAND_SEED=112344321
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
         mkdir traindir && tar xf ${traindir} -C traindir --strip-components 1
@@ -118,7 +120,7 @@ task segway_annotate {
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf training_params.tar
         gzip -nc training_params.tar > training_params.tar.gz
-    >>>
+}
 
     output {
         File segway_params = glob("training_params.tar.gz")[0]
@@ -127,7 +129,7 @@ task segway_annotate {
 
     runtime {
         cpu: ncpus
-        memory: "128 GB"
+        memory: "200 GB"
         disks: "local-disk 500 SSD"
     }
 }
@@ -142,7 +144,7 @@ task segtools {
         segtools-length-distribution -o length_distribution ${segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
         segtools-aggregation --normalize -o feature_aggregation --mode=gene ${segway_output_bed} ${annotation_gtf}
-        # TODO: add SAGA
+        # TODO: add SAGA interpretation
     }
 
     output {
