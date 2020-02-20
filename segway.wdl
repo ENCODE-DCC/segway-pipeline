@@ -26,22 +26,18 @@ workflow segway {
         }
     }
 
-    File genomedata_ = select_first([genomedata, make_genomedata.genomedata])
-
     # We can skip training if we have a traindir or if we just need to run segtools
     if (!defined(segway_traindir) && !has_segtools_input) {
         call segway_train { input:
-            genomedata = genomedata_,
+            genomedata = select_first([genomedata, make_genomedata.genomedata]),
             ncpus = num_segway_cpus,
         }
     }
 
-    File segway_traindir_ = select_first([segway_traindir, segway_train.traindir])
-
     if (!has_segtools_input) {
         call segway_annotate { input:
-            genomedata = genomedata_,
-            traindir = segway_traindir_,
+            genomedata = select_first([genomedata, make_genomedata.genomedata]),
+            traindir = select_first([segway_traindir, segway_train.traindir]),
             ncpus = num_segway_cpus,
         }
     }
