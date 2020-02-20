@@ -5,7 +5,7 @@ workflow segway {
     # Pipeline inputs to run from beginning
     Array[File]? bigwigs
     File? chrom_sizes
-    File annotation_gff
+    File annotation_gtf
 
     # Pipeline resource parameter
     Int num_segway_cpus = 96
@@ -51,7 +51,7 @@ workflow segway {
 
     call segtools { input:
         segway_output_bed = segway_output_bed_,
-        annotation_gff = annotation_gff,
+        annotation_gtf = annotation_gtf,
         segway_params = segway_params_,
     }
 }
@@ -138,14 +138,14 @@ task segway_annotate {
 
 task segtools {
     File segway_output_bed
-    File annotation_gff
+    File annotation_gtf
     File segway_params
 
     command {
         mkdir segway_params && tar xf ${segway_params} -C segway_params --strip-components 1
         segtools-length-distribution -o length_distribution ${segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
-        segtools-aggregation --normalize -o feature_aggregation --mode region ${segway_output_bed} ${annotation_gff}
+        segtools-aggregation --normalize -o feature_aggregation --mode=gene ${segway_output_bed} ${annotation_gtf}
         # TODO: add SAGA
     }
 
