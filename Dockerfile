@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh	 -O ~/miniconda.sh && \
+RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -23,7 +23,12 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
     echo "conda activate base" >> ~/.bashrc
 
 # TODO: pin versions of segway and segtools
-RUN conda install -y -c bioconda segway segtools && conda clean -afy
+RUN conda install -y -c bioconda pandas scikit-learn segway segtools && conda clean -afy
+
+RUN wget https://bitbucket.org/mlibbrecht/saga_interpretation/raw/f463f97a3e517c1f62f5a1f9003014686ba06c14/saga_interpretation.py && \
+    chmod +x saga_interpretation.py && \
+    mkdir /software && \
+    mv saga_interpretation.py /software
 
 # It was a pain to try to get the conda-installed bigWigToBedGraph to work. Instead we
 # add the binary ourselves, and mask the conda installed binary. The conda resolver

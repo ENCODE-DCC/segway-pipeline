@@ -4,6 +4,7 @@
 workflow segway {
     # Pipeline inputs to run from beginning
     Array[File]? bigwigs
+    Array[File]? tracknames
     File? chrom_sizes
     File annotation_gff
 
@@ -16,13 +17,14 @@ workflow segway {
     File? segway_output_bed
     File? segway_params
 
-    Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes)
+    Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes) && defined(tracknames)
     Boolean has_segtools_input = defined(segway_output_bed) && defined(segway_params)
     # We need a genomedata for everything except segtools
     if (!defined(genomedata) && !has_segtools_input && has_make_genomedata_input) {
         call make_genomedata { input:
             bigwigs = select_all([bigwigs])[0],
             chrom_sizes = select_all([chrom_sizes])[0],
+            tracknames = select_all([tracknames])[0],
         }
     }
 
@@ -58,10 +60,15 @@ workflow segway {
 
 task make_genomedata {
     Array[File] bigwigs
+    Array[File] tracknames
     File chrom_sizes
 
     command {
-        python "$(which make_genomedata.py)" --files ${sep=" " bigwigs} --sizes ${chrom_sizes} -o files.genomedata
+        python "$(which make_genomedata.py)" \
+            --files ${sep=" " bigwigs} \
+            --tracknames ${sep=" " tracknames} \
+            --sizes ${chrom_sizes} \
+            -o files.genomedata
     }
 
     output {
@@ -145,14 +152,42 @@ task segtools {
         mkdir segway_params && tar xf ${segway_params} -C segway_params --strip-components 1
         segtools-length-distribution -o length_distribution ${segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
-        segtools-aggregation --normalize -o feature_aggregation --mode region ${segway_output_bed} ${annotation_gff}
-        # TODO: add SAGA
+        segtools-aggregation --normalize -o feature_aggregation --mode=gene --flank-bases=10000 ${segway_output_bed} ${annotation_gff}
     }
 
     output {
         Array[File] length_distribution_info = glob("length_distribution/*")
         Array[File] gmtk_info = glob("gmtk_parameters/*")
         Array[File] feature_aggregation_info = glob("feature_aggregation/*")
+    }
+
+    runtime {
+        cpu: 8
+        memory: "16 GB"
+        disks: "local-disk 250 SSD"
+    }
+}
+
+task saga_interpretation {
+    File feature_data # tsv of <cell type>\t<histone modification>\t<genomedata path>\t<name of track within genomedata archive>
+    File reference_annotations # tsv of <path>\t<concatenation key>\t<cell type>
+    File reference_annotations_label_mapping # tsv of <concatenation key>\t<original label>\t<new label>
+    File target_annotations # tsv of <path>\t<cell type>
+    File gene_annotation_gff # gencode gff file (NOT gtf)
+    String celltype # we only run on one celltype for now, so only need one string
+
+    command {
+        python "$(which saga_interpretation.py)" \
+            --feature_data ${feature_data} \
+            --reference_anns ${reference_annotations} \
+            --target_anns ${target_annotations} \
+            --label_mappings ${reference_annotations_label_mapping} \
+            --genes ${gene_annotation_gff} \
+            --workdir saga_output
+    }
+
+    output {
+        File label_interpretations = glob("saga_output/${celltype}/state_mnemonics.txt")[0]
     }
 
     runtime {

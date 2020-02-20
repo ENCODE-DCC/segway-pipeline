@@ -7,31 +7,70 @@ import pytest
 from segway.make_genomedata import get_parser, main, make_command
 
 
-def test_make_command():
+@pytest.mark.parametrize(
+    "tracknames,condition,expected",
+    [
+        (
+            ["file1", "file2"],
+            does_not_raise(),
+            [
+                "genomedata-load",
+                "-s",
+                "chrom.sizes",
+                "--sizes",
+                "-t",
+                "file1=f1.bigwig",
+                "-t",
+                "file2=f2.bw",
+                "my.gd",
+            ],
+        ),
+        (["file1"], pytest.raises(ValueError), []),
+    ],
+)
+def test_make_command(tracknames, condition, expected):
     files = ["f1.bigwig", "f2.bw"]
     sizes = "chrom.sizes"
     outfile = "my.gd"
-    result = make_command(files, sizes, outfile)
-    assert result == [
-        "genomedata-load",
-        "-s",
-        "chrom.sizes",
-        "--sizes",
-        "-t",
-        "f1=f1.bigwig",
-        "-t",
-        "f2=f2.bw",
-        "my.gd",
-    ]
+    with condition:
+        result = make_command(tracknames, files, sizes, outfile)
+        assert result == expected
 
 
 @pytest.mark.parametrize(
     "args,condition",
     [
-        (["--sizes", "ch.sizes", "--files", "b.bw", "-o", "outfile"], does_not_raise()),
-        (["--sizes", "ch.sizes", "-o", "outfile"], pytest.raises(SystemExit)),
-        (["--files", "b.bw", "-o", "outfile"], pytest.raises(SystemExit)),
-        (["--sizes", "ch.sizes", "--files", "b.bw"], pytest.raises(SystemExit)),
+        (
+            [
+                "--sizes",
+                "ch.sizes",
+                "--files",
+                "a.bw",
+                "b.bw",
+                "--tracknames",
+                "foo",
+                "bar",
+                "-o",
+                "outfile",
+            ],
+            does_not_raise(),
+        ),
+        (
+            ["--sizes", "ch.sizes", "--tracknames", "foo", "-o", "outfile"],
+            pytest.raises(SystemExit),
+        ),
+        (
+            ["--files", "b.bw", "--tracknames", "foo", "-o", "outfile"],
+            pytest.raises(SystemExit),
+        ),
+        (
+            ["--sizes", "ch.sizes", "--files", "b.bw", "--tracknames", "foo"],
+            pytest.raises(SystemExit),
+        ),
+        (
+            ["--sizes", "ch.sizes", "--files", "b.bw", "-o", "outfile"],
+            pytest.raises(SystemExit),
+        ),
     ],
 )
 def test_get_parser(args: List[str], condition):
@@ -46,7 +85,17 @@ def test_main(mocker):
     and the second extracts the first positional arg.
     """
     mocker.patch("subprocess.run")
-    testargs = ["prog", "--files", "ref.bw", "--sizes", "chrom.sizes", "-o", "out.file"]
+    testargs = [
+        "prog",
+        "--files",
+        "ref.bw",
+        "--tracknames",
+        "foo",
+        "--sizes",
+        "chrom.sizes",
+        "-o",
+        "out.file",
+    ]
     mocker.patch("sys.argv", testargs)
     main()
     assert subprocess.run.call_args[0] == (
@@ -56,7 +105,7 @@ def test_main(mocker):
             "chrom.sizes",
             "--sizes",
             "-t",
-            "ref=ref.bw",
+            "foo=ref.bw",
             "out.file",
         ],
     )
