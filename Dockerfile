@@ -22,8 +22,8 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
-# TODO: pin versions of segway and segtools
-RUN conda install -y -c bioconda segway segtools && conda clean -afy
+RUN conda install -y -c bioconda segway==3.0 segtools==1.2.4 numpy==1.16.4 && \
+    conda clean -afy
 
 # It was a pain to try to get the conda-installed bigWigToBedGraph to work. Instead we
 # add the binary ourselves, and mask the conda installed binary. The conda resolver
