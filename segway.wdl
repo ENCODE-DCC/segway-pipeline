@@ -12,6 +12,7 @@ workflow segway {
 
     # Optional inputs for starting the pipeline not from the beginning
     File? genomedata
+    Int? num_labels
     File? segway_traindir
     File? segway_output_bed
     File? segway_params
@@ -30,6 +31,7 @@ workflow segway {
     if (!defined(segway_traindir) && !has_segtools_input) {
         call segway_train { input:
             genomedata = select_first([genomedata, make_genomedata.genomedata]),
+            num_labels = select_first([num_labels, make_genomedata.num_labels]),
             ncpus = num_segway_cpus,
         }
     }
@@ -58,10 +60,12 @@ task make_genomedata {
 
     command {
         python "$(which make_genomedata.py)" --files ${sep=" " bigwigs} --sizes ${chrom_sizes} -o files.genomedata
+        python "$(which calculate_num_labels.py)" --num-tracks ${length(bigwigs)} -o num_labels.txt
     }
 
     output {
         File genomedata = glob("files.genomedata")[0]
+        Int num_labels = read_int("num_labels.txt")
     }
 
     runtime {
@@ -73,13 +77,14 @@ task make_genomedata {
 
 task segway_train {
     File genomedata
+    Int num_labels
     Int ncpus
 
     command <<<
         export SEGWAY_RAND_SEED=112344321
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
         mkdir traindir
-        segway train ${genomedata} traindir
+        segway train --num-labels ${num_labels} ${genomedata} traindir
         # See https://stackoverflow.com/a/54908072 and
         # https://reproducible-builds.org/docs/archives/. Want to make tar idempotent
         find traindir -print0 |
