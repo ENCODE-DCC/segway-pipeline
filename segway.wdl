@@ -80,7 +80,7 @@ task segway_train {
     Int num_labels
     Int ncpus
 
-    command <<<
+    command {
         mkdir tmp
         export TMPDIR="$PWD/tmp"
         export SEGWAY_RAND_SEED=112344321
@@ -96,16 +96,17 @@ task segway_train {
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf traindir.tar
         gzip -nc traindir.tar > traindir.tar.gz
-    >>>
+    }
 
     output {
         File traindir = glob("traindir.tar.gz")[0]
+        File trained_params = glob("traindir/params/params.params")[0]
     }
 
     runtime {
         cpu: ncpus
-        memory: "32 GB"
-        disks: "local-disk 500 SSD"
+        memory: "200 GB"
+        disks: "local-disk 1000 SSD"
     }
 }
 
