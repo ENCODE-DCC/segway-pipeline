@@ -87,7 +87,7 @@ task segway_train {
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
         export OMP_NUM_THREADS=1
         mkdir traindir
-        segway train --num-labels ${num_labels} ${genomedata} traindir
+        SEGWAY_CLUSTER=local segway train --num-labels ${num_labels} ${genomedata} traindir
         # See https://stackoverflow.com/a/54908072 and
         # https://reproducible-builds.org/docs/archives/. Want to make tar idempotent
         find traindir -print0 |
@@ -122,7 +122,7 @@ task segway_annotate {
         export OMP_NUM_THREADS=1
         mkdir traindir && tar xf ${traindir} -C traindir --strip-components 1
         mkdir identifydir
-        segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
+        SEGWAY_CLUSTER=local segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
         find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master|params/params.params|segway.str|triangulation)($|/.*)' -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
@@ -140,7 +140,7 @@ task segway_annotate {
     runtime {
         cpu: ncpus
         memory: "200 GB"
-        disks: "local-disk 500 SSD"
+        disks: "local-disk 1000 SSD"
     }
 }
 
