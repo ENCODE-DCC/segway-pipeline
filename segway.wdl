@@ -105,7 +105,7 @@ task segway_train {
 
     runtime {
         cpu: ncpus
-        memory: "200 GB"
+        memory: "300 GB"
         disks: "local-disk 1000 SSD"
     }
 }
