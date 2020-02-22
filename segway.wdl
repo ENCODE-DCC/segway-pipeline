@@ -81,8 +81,11 @@ task segway_train {
     Int ncpus
 
     command <<<
+        mkdir tmp
+        export TMPDIR="$PWD/tmp"
         export SEGWAY_RAND_SEED=112344321
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
+        export OMP_NUM_THREADS=1
         mkdir traindir
         segway train --num-labels ${num_labels} ${genomedata} traindir
         # See https://stackoverflow.com/a/54908072 and
@@ -116,6 +119,7 @@ task segway_annotate {
         export TMPDIR="$PWD/tmp"
         export SEGWAY_RAND_SEED=112344321
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
+        export OMP_NUM_THREADS=1
         mkdir traindir && tar xf ${traindir} -C traindir --strip-components 1
         mkdir identifydir
         segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
@@ -130,6 +134,7 @@ task segway_annotate {
     output {
         File segway_params = glob("training_params.tar.gz")[0]
         File output_bed = glob("segway.bed.gz")[0]
+        Array[File] logs = glob("identifydir/output/e/identify/*")
     }
 
     runtime {
