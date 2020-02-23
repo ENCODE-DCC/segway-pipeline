@@ -15,7 +15,7 @@ def calculate_num_labels(num_tracks: int) -> int:
     Calculates the number of labels based on the formula provided in Libbrecht et. al.
     2019, 10 + 2 * sqrt(number of tracks)
     """
-    return int(10 + 2 * int(sqrt(num_tracks)))
+    return int(10 + 2 * sqrt(num_tracks))
 
 
 def get_parser() -> argparse.ArgumentParser:
