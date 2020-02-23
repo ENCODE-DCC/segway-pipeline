@@ -100,6 +100,7 @@ task segway_train {
 
     output {
         File traindir = glob("traindir.tar.gz")[0]
+        # Checks that the model training actually emitted final params, not used
         File trained_params = glob("traindir/params/params.params")[0]
     }
 
@@ -140,7 +141,7 @@ task segway_annotate {
 
     runtime {
         cpu: ncpus
-        memory: "200 GB"
+        memory: "300 GB"
         disks: "local-disk 1000 SSD"
     }
 }
