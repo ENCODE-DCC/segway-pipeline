@@ -7,8 +7,15 @@ workflow segway {
     File? chrom_sizes
     File annotation_gtf
 
-    # Pipeline resource parameter
+    # Segway resource parameter
     Int num_segway_cpus = 96
+
+    # Segway training hyperparameters. First three defaults taken from Libbrecht et al 2019
+    Float minibatch_fraction = 0.01
+    Int max_train_rounds = 25
+    Int num_instances = 10
+    Float prior_strength = 1
+    Float? segtransition_weight_scale
 
     # Optional inputs for starting the pipeline not from the beginning
     File? genomedata
@@ -33,6 +40,11 @@ workflow segway {
             genomedata = select_first([genomedata, make_genomedata.genomedata]),
             num_labels = select_first([num_labels, make_genomedata.num_labels]),
             ncpus = num_segway_cpus,
+            minibatch_fraction = minibatch_fraction,
+            max_train_rounds = max_train_rounds,
+            num_instances = num_instances,
+            prior_strength = prior_strength,
+            segtransition_weight_scale = select_first([make_genomedata.num_tracks, segtransition_weight_scale])
         }
     }
 
@@ -66,6 +78,7 @@ task make_genomedata {
     output {
         File genomedata = glob("files.genomedata")[0]
         Int num_labels = read_int("num_labels.txt")
+        Int num_tracks = length(bigwigs)
     }
 
     runtime {
@@ -79,6 +92,11 @@ task segway_train {
     File genomedata
     Int num_labels
     Int ncpus
+    Float minibatch_fraction
+    Int max_train_rounds
+    Int num_instances
+    Float prior_strength
+    Float segtransition_weight_scale
 
     command {
         mkdir tmp
@@ -87,7 +105,14 @@ task segway_train {
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
         export OMP_NUM_THREADS=1
         mkdir traindir
-        SEGWAY_CLUSTER=local segway train --num-labels ${num_labels} ${genomedata} traindir
+        SEGWAY_CLUSTER=local segway train \
+            --num-labels ${num_labels} \
+            --minibatch-fraction ${minibatch_fraction} \
+            --num-instances ${num_instances} \
+            --prior-strength ${prior_strength} \
+            --segtransition-weight-scale ${segtransition_weight_scale} \
+            --max-train-rounds ${max_train_rounds} \
+            ${genomedata} traindir
         # See https://stackoverflow.com/a/54908072 and
         # https://reproducible-builds.org/docs/archives/. Want to make tar idempotent
         find traindir -print0 |
