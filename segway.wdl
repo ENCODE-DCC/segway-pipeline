@@ -43,7 +43,9 @@ workflow segway {
             minibatch_fraction = minibatch_fraction,
             max_train_rounds = max_train_rounds,
             num_instances = num_instances,
-            prior_strength = prior_strength,
+            # specifying prior strength causes segway to crash:
+            # https://bitbucket.org/hoffmanlab/segway/issues/136/using-the-prior-strength-option-causes
+            # prior_strength = prior_strength,
             segtransition_weight_scale = select_first([make_genomedata.num_tracks, segtransition_weight_scale])
         }
     }
@@ -95,7 +97,7 @@ task segway_train {
     Float minibatch_fraction
     Int max_train_rounds
     Int num_instances
-    Float prior_strength
+    Float? prior_strength
     Float segtransition_weight_scale
 
     command {
@@ -109,7 +111,7 @@ task segway_train {
             --num-labels ${num_labels} \
             --minibatch-fraction ${minibatch_fraction} \
             --num-instances ${num_instances} \
-            --prior-strength ${prior_strength} \
+            ${if defined(prior_strength) then "--prior_strength " + prior_strength else ""} \
             --segtransition-weight-scale ${segtransition_weight_scale} \
             --max-train-rounds ${max_train_rounds} \
             ${genomedata} traindir
