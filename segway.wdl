@@ -168,7 +168,7 @@ task segway_annotate {
 
     runtime {
         cpu: ncpus
-        memory: "300 GB"
+        memory: "400 GB"
         disks: "local-disk 1000 SSD"
     }
 }
