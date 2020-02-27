@@ -7,8 +7,15 @@ workflow segway {
     File? chrom_sizes
     File annotation_gtf
 
-    # Pipeline resource parameter
+    # Segway resource parameter
     Int num_segway_cpus = 96
+
+    # Segway training hyperparameters. First three defaults taken from Libbrecht et al 2019
+    Float minibatch_fraction = 0.01
+    Int max_train_rounds = 25
+    Int num_instances = 10
+    Float prior_strength = 1
+    Float? segtransition_weight_scale
 
     # Optional inputs for starting the pipeline not from the beginning
     File? genomedata
@@ -33,6 +40,13 @@ workflow segway {
             genomedata = select_first([genomedata, make_genomedata.genomedata]),
             num_labels = select_first([num_labels, make_genomedata.num_labels]),
             ncpus = num_segway_cpus,
+            minibatch_fraction = minibatch_fraction,
+            max_train_rounds = max_train_rounds,
+            num_instances = num_instances,
+            # specifying prior strength causes segway to crash:
+            # https://bitbucket.org/hoffmanlab/segway/issues/136/using-the-prior-strength-option-causes
+            # prior_strength = prior_strength,
+            segtransition_weight_scale = select_first([make_genomedata.num_tracks, segtransition_weight_scale])
         }
     }
 
@@ -66,6 +80,7 @@ task make_genomedata {
     output {
         File genomedata = glob("files.genomedata")[0]
         Int num_labels = read_int("num_labels.txt")
+        Int num_tracks = length(bigwigs)
     }
 
     runtime {
@@ -79,12 +94,27 @@ task segway_train {
     File genomedata
     Int num_labels
     Int ncpus
+    Float minibatch_fraction
+    Int max_train_rounds
+    Int num_instances
+    Float? prior_strength
+    Float segtransition_weight_scale
 
-    command <<<
+    command {
+        mkdir tmp
+        export TMPDIR="$PWD/tmp"
         export SEGWAY_RAND_SEED=112344321
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
+        export OMP_NUM_THREADS=1
         mkdir traindir
-        segway train --num-labels ${num_labels} ${genomedata} traindir
+        SEGWAY_CLUSTER=local segway train \
+            --num-labels ${num_labels} \
+            --minibatch-fraction ${minibatch_fraction} \
+            --num-instances ${num_instances} \
+            ${if defined(prior_strength) then "--prior_strength " + prior_strength else ""} \
+            --segtransition-weight-scale ${segtransition_weight_scale} \
+            --max-train-rounds ${max_train_rounds} \
+            ${genomedata} traindir
         # See https://stackoverflow.com/a/54908072 and
         # https://reproducible-builds.org/docs/archives/. Want to make tar idempotent
         find traindir -print0 |
@@ -93,16 +123,18 @@ task segway_train {
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf traindir.tar
         gzip -nc traindir.tar > traindir.tar.gz
-    >>>
+    }
 
     output {
         File traindir = glob("traindir.tar.gz")[0]
+        # Checks that the model training actually emitted final params, not used
+        File trained_params = glob("traindir/params/params.params")[0]
     }
 
     runtime {
         cpu: ncpus
-        memory: "32 GB"
-        disks: "local-disk 500 SSD"
+        memory: "300 GB"
+        disks: "local-disk 1000 SSD"
     }
 }
 
@@ -116,9 +148,10 @@ task segway_annotate {
         export TMPDIR="$PWD/tmp"
         export SEGWAY_RAND_SEED=112344321
         export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
+        export OMP_NUM_THREADS=1
         mkdir traindir && tar xf ${traindir} -C traindir --strip-components 1
         mkdir identifydir
-        segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
+        SEGWAY_CLUSTER=local segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
         find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master|params/params.params|segway.str|triangulation)($|/.*)' -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
@@ -130,12 +163,13 @@ task segway_annotate {
     output {
         File segway_params = glob("training_params.tar.gz")[0]
         File output_bed = glob("segway.bed.gz")[0]
+        Array[File] logs = glob("identifydir/output/e/identify/*")
     }
 
     runtime {
         cpu: ncpus
-        memory: "200 GB"
-        disks: "local-disk 500 SSD"
+        memory: "400 GB"
+        disks: "local-disk 1000 SSD"
     }
 }
 
