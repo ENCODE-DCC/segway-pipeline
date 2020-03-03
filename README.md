@@ -26,5 +26,11 @@ A pipeline to run [Segway](https://segway.hoffmanlab.org/) and [Segtools](https:
 `cd` to the `segway` repository cloned in the installation, and run the following:
 
 ```bash
-$ caper run segway.wdl -i ${INPUT_JSON} -o workflow_opts/docker.json
+$ caper run segway.wdl -i ${INPUT_JSON} -o workflow_opts/docker.json -b ${BACKEND}
 ```
+
+## Input Data
+
+In the `scripts` directory there is a script to generate lists of input. It takes the ENCODE accession of a [reference epigenome](https://www.encodeproject.org/search/?type=ReferenceEpigenome) as an argument, finds the appropriate files to use as input to the model, and generates an input JSON for the pipeline. It will filter out control experiments and non-continuous datasets like WGBS and identify bigWig files on GRCh38 for each non-control experiment, preferring pooled files if the experiment is replicated. For ChIP-seq, bigWigs with the output type `fold change over control` will be selected.
+
+To install dependencies for the scripts, make sure you have Python >= 3.5 and run `pip install -r requirements-scripts.txt`
