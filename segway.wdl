@@ -11,6 +11,7 @@ workflow segway {
     Int num_segway_cpus = 96
 
     # Segway training hyperparameters. First three defaults taken from Libbrecht et al 2019
+    Int resolution = 100
     Float minibatch_fraction = 0.01
     Int max_train_rounds = 25
     Int num_instances = 10
@@ -40,6 +41,7 @@ workflow segway {
             genomedata = select_first([genomedata, make_genomedata.genomedata]),
             num_labels = select_first([num_labels, make_genomedata.num_labels]),
             ncpus = num_segway_cpus,
+            resolution = resolution,
             minibatch_fraction = minibatch_fraction,
             max_train_rounds = max_train_rounds,
             num_instances = num_instances,
@@ -94,6 +96,7 @@ task segway_train {
     File genomedata
     Int num_labels
     Int ncpus
+    Int resolution
     Float minibatch_fraction
     Int max_train_rounds
     Int num_instances
@@ -109,6 +112,7 @@ task segway_train {
         mkdir traindir
         SEGWAY_CLUSTER=local segway train \
             --num-labels ${num_labels} \
+            --resolution ${resolution} \
             --minibatch-fraction ${minibatch_fraction} \
             --num-instances ${num_instances} \
             ${if defined(prior_strength) then "--prior_strength " + prior_strength else ""} \
