@@ -1,75 +1,124 @@
 import argparse
 import json
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 import httpx
 
 InputJson = Dict[str, Union[float, int, str, List[str]]]
 
-PORTAL_URL = "https://www.encodeproject.org/reference-epigenomes/"
-ANNOTATION_GTF = (
-    "https://encode-public.s3.amazonaws.com/2019/06/04/8f6cba12-2ebe-4bec-a15d-53f49897"
-    "9de0/gencode.v29.primary_assembly.annotation_UCSC_names.gtf.gz"
-)
-CHROM_SIZES = (
-    "https://encode-public.s3.amazonaws.com/2016/01/06/89effdbe-9e3f-48c6-9781-81e565ac"
-    "45a3/GRCh38_EBV.chrom.sizes.tsv"
-)
+PORTAL_URL = "https://www.encodeproject.org/"
 WORKFLOW_NAME = "segway"
+EXCLUDED_STATUSES = ("revoked", "archived", "replaced", "deleted")
+DATASET_OUTPUT_TYPE = {
+    "ATAC-seq": "fold change_over control",
+    "DNase-seq": "read-depth normalized signal",
+    "Histone ChIP-seq": "fold change over control",
+    "TF ChIP-seq": "fold change over control",
+}
+
+
+class UrlJoiner:
+    def __init__(self, base_url: str):
+        self._base_url = base_url
+        self.base_is_valid = False
+
+    @staticmethod
+    def validate_base_url(base_url):
+        if not base_url.endswith("/"):
+            raise ValueError("Base url must end with a `/`")
+        return base_url
+
+    @property
+    def base_url(self):
+        if not self.base_is_valid:
+            self._base_url = self.validate_base_url(self._base_url)
+            self.base_is_valid = True
+        return self._base_url
+
+    def resolve(self, path: str):
+        return urljoin(self.base_url, path)
 
 
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    url = urljoin(PORTAL_URL, args.accession)
-    reference_epigenome = get_json(url)
-    portal_files = get_portal_files(reference_epigenome)
-    extra_props = {k: v for k, v in vars(args).items() if v is not None}
-    extra_props.pop("accession")
-    extra_props.pop("outfile", None)
-    extra_props["chrom_sizes"] = CHROM_SIZES
-    extra_props["annotation_gtf"] = ANNOTATION_GTF
+    urljoiner = UrlJoiner(PORTAL_URL)
+    epigenome_id = (
+        "/".join(("reference-epigenomes", args.accession))
+        if not args.accession.startswith("reference-epigenomes")
+        else args.accession
+    )
+    reference_epigenome_url, chrom_sizes_url, annotation_url = map(
+        urljoiner.resolve, (epigenome_id, args.chrom_sizes, args.annotation_gtf)
+    )
+    reference_epigenome = get_json(reference_epigenome_url)
+    assembly = get_assembly(chrom_sizes_url)
+    portal_files = get_portal_files(reference_epigenome, assembly, urljoiner)
+    extra_props = get_extra_props_from_args(args, chrom_sizes_url, annotation_url)
     input_json = make_input_json(portal_files, extra_props)
-    outfile = args.outfile
-    if args.outfile is None:
-        outfile = f"{args.accession}.json"
+    outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
     write_json(input_json, outfile)
 
 
-def get_portal_files(reference_epigenome: Dict[str, Any]) -> List[str]:
-    dataset_output_type = {
-        "TF ChIP-seq": "fold change over control",
-        "Histone ChIP-seq": "fold change over control",
-        "DNase-seq": "read-depth normalized signal",
-    }
+def get_portal_files(
+    reference_epigenome: Dict[str, Any], assembly: str, urljoiner: UrlJoiner
+) -> List[str]:
     datasets_files: Dict[str, str] = {}
     for dataset in reference_epigenome["related_datasets"]:
         assay_title = dataset["assay_title"]
         at_id = dataset["@id"]
-        if assay_title not in dataset_output_type.keys():
+        if assay_title not in DATASET_OUTPUT_TYPE.keys():
             continue
-        num_bioreps = len(
-            set(i["biological_replicate_number"] for i in dataset["replicates"])
+        bioreps = set(
+            i["biological_replicate_number"]
+            for i in filter_by_status(dataset["replicates"])
         )
-        for file in dataset["files"]:
-            if (
-                file["file_format"] != "bigWig"
-                or file["assembly"] != "GRCh38"
-                or len(file["biological_replicates"]) < num_bioreps
-            ):
+        num_bioreps = len(bioreps)
+        files = filter_by_status(dataset["files"])
+        is_replicated_dnase = assay_title == "DNase-seq" and num_bioreps > 1
+        if is_replicated_dnase:
+            preferred_replicate = get_dnase_preferred_replicate(files, urljoiner)
+        for file in files:
+            if file["file_format"] != "bigWig" or file["assembly"] != assembly:
                 continue
-            if file["output_type"] == dataset_output_type[assay_title]:
+            if is_replicated_dnase:
+                if sorted(file["biological_replicates"]) != sorted(preferred_replicate):
+                    continue
+            elif len(file["biological_replicates"]) < num_bioreps:
+                continue
+            if file["output_type"] == DATASET_OUTPUT_TYPE[assay_title]:
                 if at_id not in datasets_files:
-                    datasets_files[at_id] = file["cloud_metadata"]["url"]
+                    datasets_files[at_id] = get_url_from_file_obj(file)
                 else:
                     raise ValueError(
                         (
                             f"Found more than one file for dataset {at_id}: found "
-                            f"{file['@id']} but already found {datasets_files[at_id]}"
+                            f"{file['@id']} but already found "
+                            f"{datasets_files[at_id]}"
                         )
                     )
     return list(datasets_files.values())
+
+
+def get_extra_props_from_args(
+    args: argparse.Namespace, chrom_sizes_url: str, annotation_url: str
+) -> InputJson:
+    extra_props = {k: v for k, v in vars(args).items() if v is not None}
+    extra_props.pop("accession")
+    extra_props.pop("outfile", None)
+    extra_props["chrom_sizes"] = get_url_for_file(chrom_sizes_url)
+    extra_props["annotation_gtf"] = get_url_for_file(annotation_url)
+    return extra_props
+
+
+def get_assembly(chrom_sizes_url: str) -> str:
+    file = get_json(chrom_sizes_url)
+    try:
+        assembly = file["assembly"]
+    except KeyError as e:
+        raise ValueError("Chrom sizes file does not have an assembly") from e
+    return assembly
 
 
 def make_input_json(portal_files: List[str], extra_props: InputJson) -> InputJson:
@@ -90,6 +139,51 @@ def get_json(url: str, auth: Optional[Tuple[str, str]] = None) -> Dict[str, Any]
     if not isinstance(res, dict):
         raise TypeError(f"Got a JSON array from url {url}, expected object")
     return res
+
+
+def get_url_from_file_obj(portal_file: Dict[str, Any]) -> str:
+    try:
+        url = portal_file["cloud_metadata"]["url"]
+    except KeyError as e:
+        raise KeyError(
+            f"Could not identify cloud metadata from portal file {portal_file['@id']}"
+        ) from e
+    return url
+
+
+def get_url_for_file(file_url: str) -> str:
+    file_obj = get_json(file_url)
+    file_s3_url = get_url_from_file_obj(file_obj)
+    return file_s3_url
+
+
+def filter_by_status(objs: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    filtered = []
+    for obj in objs:
+        if obj["status"] not in EXCLUDED_STATUSES:
+            filtered.append(obj)
+    return filtered
+
+
+def get_dnase_preferred_replicate(
+    files: List[Dict[str, Any]], urljoiner: UrlJoiner
+) -> List[int]:
+    bams = [i for i in files if i["output_type"] == "alignments"]
+    max_mapped_read_count = -1
+    for bam in bams:
+        samtools_flagstats = [
+            i for i in bam["quality_metrics"] if i.startswith("/samtools-flagstats")
+        ]
+        if len(samtools_flagstats) != 1:
+            raise ValueError(
+                f"Expected one samtools flagstats quality metric for file {bam['@id']}, found {len(samtools_flagstats)}"
+            )
+        qc = get_json(urljoiner.resolve(samtools_flagstats[0]))
+        qc_mapped_read_count = qc["mapped"]
+        if qc_mapped_read_count > max_mapped_read_count:
+            preferred_replicate = bam["biological_replicates"]
+            max_mapped_read_count = qc_mapped_read_count
+    return preferred_replicate
 
 
 def write_json(input_json: InputJson, path: str):
@@ -140,6 +234,24 @@ def get_parser() -> argparse.ArgumentParser:
         "--segtransition-weight-scale",
         type=float,
         help="Coefficient for segment length prior, if not specified will use pipeline defaults",
+    )
+    parser.add_argument(
+        "-g",
+        "--annotation-gtf",
+        required=True,
+        help=(
+            "ENCODE ID corresponding to the GENCODE annotation GTF to use as input for "
+            "the pipeline, e.g. `gencode.v29.primary_assembly.annotation_UCSC_names`"
+        ),
+    )
+    parser.add_argument(
+        "-c",
+        "--chrom-sizes",
+        required=True,
+        help=(
+            "ENCODE ID corresponding to the chrom sizes file to use as input to the "
+            "pipeline, e.g. `GRCh38_EBV.chrom.sizes`"
+        ),
     )
     parser.add_argument("-o", "--outfile")
     return parser
