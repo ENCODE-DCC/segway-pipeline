@@ -43,6 +43,7 @@ class UrlJoiner:
 def main():
     parser = get_parser()
     args = parser.parse_args()
+    keypair = get_keypair(args.keypair)
     urljoiner = UrlJoiner(PORTAL_URL)
     epigenome_id = (
         "/".join(("reference-epigenomes", args.accession))
@@ -52,13 +53,29 @@ def main():
     reference_epigenome_url, chrom_sizes_url, annotation_url = map(
         urljoiner.resolve, (epigenome_id, args.chrom_sizes, args.annotation_gtf)
     )
-    reference_epigenome = get_json(reference_epigenome_url)
+    reference_epigenome = get_json(reference_epigenome_url, auth=keypair)
     assembly = get_assembly(chrom_sizes_url)
     portal_files = get_portal_files(reference_epigenome, assembly, urljoiner)
     extra_props = get_extra_props_from_args(args, chrom_sizes_url, annotation_url)
     input_json = make_input_json(portal_files, extra_props)
     outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
     write_json(input_json, outfile)
+
+
+def get_keypair(keypair_path: Optional[str]) -> Optional[Tuple[str, str]]:
+    if keypair_path is None:
+        return None
+    with open(keypair_path) as f:
+        data = json.load(f)
+    try:
+        submit = data["submit"]
+        key = submit["key"]
+        secret = submit["secret"]
+    except KeyError as e:
+        raise KeyError(
+            'Invalid keypairs file, must take the form of {"submit": {"key": ... , "secret"}}'
+        ) from e
+    return key, secret
 
 
 def get_portal_files(
@@ -253,7 +270,12 @@ def get_parser() -> argparse.ArgumentParser:
             "pipeline, e.g. `GRCh38_EBV.chrom.sizes`"
         ),
     )
-    parser.add_argument("-o", "--outfile")
+    parser.add_argument("-o", "--outfile", help="Name of file to output the input JSON")
+    parser.add_argument(
+        "-k",
+        "--keypair",
+        help="Path to JSON file containing portal API keys, only needed for in progress data",
+    )
     return parser
 
 

@@ -12,6 +12,7 @@ from scripts.make_input_jsons_from_portal import (
     get_assembly,
     get_dnase_preferred_replicate,
     get_json,
+    get_keypair,
     get_parser,
     get_portal_files,
     get_url_from_file_obj,
@@ -331,6 +332,26 @@ def test_get_portal_files(
     with condition:
         result = get_portal_files(reference_epigenome, assembly, urljoiner)
         assert sorted(result) == sorted(expected)
+
+
+@pytest.mark.parametrize(
+    "condition,path,read_data,expected",
+    [
+        (does_not_raise(), None, "{}", None),
+        (
+            does_not_raise(),
+            "foo.json",
+            '{"submit": {"key": "foo", "secret": "bar"}}',
+            ("foo", "bar"),
+        ),
+        (pytest.raises(KeyError), "bar.json", '{"server": "wrong"}', ()),
+    ],
+)
+def test_get_keypair(mocker, condition, path, read_data, expected):
+    mocker.patch("builtins.open", mocker.mock_open(read_data=read_data))
+    with condition:
+        result = get_keypair(path)
+        assert result == expected
 
 
 @pytest.mark.parametrize(
