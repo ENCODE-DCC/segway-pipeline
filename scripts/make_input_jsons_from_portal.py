@@ -73,7 +73,7 @@ def get_keypair(keypair_path: Optional[str]) -> Optional[Tuple[str, str]]:
         secret = submit["secret"]
     except KeyError as e:
         raise KeyError(
-            'Invalid keypairs file, must take the form of {"submit": {"key": ... , "secret"}}'
+            'Invalid keypairs file, must take the form of {"submit": {"key": ... , "secret": ...}}'
         ) from e
     return key, secret
 
