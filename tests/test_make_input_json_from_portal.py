@@ -11,6 +11,7 @@ from scripts.make_input_jsons_from_portal import (
     filter_by_status,
     get_assembly,
     get_dnase_preferred_replicate,
+    get_extra_props_from_args,
     get_json,
     get_keypair,
     get_parser,
@@ -352,6 +353,18 @@ def test_get_keypair(mocker, condition, path, read_data, expected):
     with condition:
         result = get_keypair(path)
         assert result == expected
+
+
+def test_get_extra_props_from_args():
+    args = {"accession": "foo", "outfile": "bar", "keypair": "baz", "extra": 3}
+    chrom_sizes_url = "www.chrom.sizes"
+    annotation_url = "annotation.url"
+    result = get_extra_props_from_args(args, chrom_sizes_url, annotation_url)
+    assert result == {
+        "annotation_gtf": "annotation.url",
+        "chrom_sizes": "www.chrom.sizes",
+        "extra": 3,
+    }
 
 
 @pytest.mark.parametrize(

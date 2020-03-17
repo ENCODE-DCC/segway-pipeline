@@ -56,7 +56,11 @@ def main():
     reference_epigenome = get_json(reference_epigenome_url, auth=keypair)
     assembly = get_assembly(chrom_sizes_url)
     portal_files = get_portal_files(reference_epigenome, assembly, urljoiner)
-    extra_props = get_extra_props_from_args(args, chrom_sizes_url, annotation_url)
+    chrom_sizes_s3_url = get_url_for_file(chrom_sizes_url)
+    annotation_s3_url = get_url_for_file(annotation_url)
+    extra_props = get_extra_props_from_args(
+        vars(args), chrom_sizes_s3_url, annotation_s3_url
+    )
     input_json = make_input_json(portal_files, extra_props)
     outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
     write_json(input_json, outfile)
@@ -119,14 +123,16 @@ def get_portal_files(
 
 
 def get_extra_props_from_args(
-    args: argparse.Namespace, chrom_sizes_url: str, annotation_url: str
+    args: Dict[str, Union[float, int, None, str]],
+    chrom_sizes_url: str,
+    annotation_url: str,
 ) -> InputJson:
-    extra_props = {k: v for k, v in vars(args).items() if v is not None}
+    extra_props: InputJson = {k: v for k, v in args.items() if v is not None}
     extra_props.pop("accession")
     extra_props.pop("outfile", None)
     extra_props.pop("keypair", None)
-    extra_props["chrom_sizes"] = get_url_for_file(chrom_sizes_url)
-    extra_props["annotation_gtf"] = get_url_for_file(annotation_url)
+    extra_props["chrom_sizes"] = chrom_sizes_url
+    extra_props["annotation_gtf"] = annotation_url
     return extra_props
 
 
