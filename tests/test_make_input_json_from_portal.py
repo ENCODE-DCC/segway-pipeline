@@ -386,7 +386,7 @@ def test_make_input_json():
     [
         (does_not_raise(), 200, {"foo": "bar"}),
         (pytest.raises(TypeError), 200, ["foo"]),
-        (pytest.raises(httpx.exceptions.HTTPError), 404, {}),
+        (pytest.raises(httpx.HTTPError), 404, {}),
     ],
 )
 @respx.mock

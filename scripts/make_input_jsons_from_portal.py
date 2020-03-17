@@ -124,6 +124,7 @@ def get_extra_props_from_args(
     extra_props = {k: v for k, v in vars(args).items() if v is not None}
     extra_props.pop("accession")
     extra_props.pop("outfile", None)
+    extra_props.pop("keypair", None)
     extra_props["chrom_sizes"] = get_url_for_file(chrom_sizes_url)
     extra_props["annotation_gtf"] = get_url_for_file(annotation_url)
     return extra_props
