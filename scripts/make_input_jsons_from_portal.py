@@ -24,23 +24,23 @@ class UrlJoiner:
         self.base_is_valid = False
 
     @staticmethod
-    def validate_base_url(base_url):
+    def validate_base_url(base_url: str) -> str:
         if not base_url.endswith("/"):
             raise ValueError("Base url must end with a `/`")
         return base_url
 
     @property
-    def base_url(self):
+    def base_url(self) -> str:
         if not self.base_is_valid:
             self._base_url = self.validate_base_url(self._base_url)
             self.base_is_valid = True
         return self._base_url
 
-    def resolve(self, path: str):
+    def resolve(self, path: str) -> str:
         return urljoin(self.base_url, path)
 
 
-def main():
+def main() -> None:
     parser = get_parser()
     args = parser.parse_args()
     keypair = get_keypair(args.keypair)
@@ -139,7 +139,7 @@ def get_extra_props_from_args(
 def get_assembly(chrom_sizes_url: str) -> str:
     file = get_json(chrom_sizes_url)
     try:
-        assembly = file["assembly"]
+        assembly: str = file["assembly"]
     except KeyError as e:
         raise ValueError("Chrom sizes file does not have an assembly") from e
     return assembly
@@ -167,7 +167,7 @@ def get_json(url: str, auth: Optional[Tuple[str, str]] = None) -> Dict[str, Any]
 
 def get_url_from_file_obj(portal_file: Dict[str, Any]) -> str:
     try:
-        url = portal_file["cloud_metadata"]["url"]
+        url: str = portal_file["cloud_metadata"]["url"]
     except KeyError as e:
         raise KeyError(
             f"Could not identify cloud metadata from portal file {portal_file['@id']}"
@@ -205,12 +205,12 @@ def get_dnase_preferred_replicate(
         qc = get_json(urljoiner.resolve(samtools_flagstats[0]))
         qc_mapped_read_count = qc["mapped"]
         if qc_mapped_read_count > max_mapped_read_count:
-            preferred_replicate = bam["biological_replicates"]
+            preferred_replicate: List[int] = bam["biological_replicates"]
             max_mapped_read_count = qc_mapped_read_count
     return preferred_replicate
 
 
-def write_json(input_json: InputJson, path: str):
+def write_json(input_json: InputJson, path: str) -> None:
     with open(path, "w") as f:
         f.write(json.dumps(input_json, indent=4))
 
