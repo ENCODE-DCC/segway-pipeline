@@ -194,6 +194,24 @@ def test_main(mocker):
                         ],
                     },
                     {
+                        "@id": "atac",
+                        "assay_title": "ATAC-seq",
+                        "replicates": [
+                            {"biological_replicate_number": 1, "status": "released"}
+                        ],
+                        "files": [
+                            {
+                                "@id": "atac_1",
+                                "assembly": "GRCh38",
+                                "output_type": "fold change over control",
+                                "file_format": "bigWig",
+                                "biological_replicates": [1],
+                                "cloud_metadata": {"url": "https://a.tac/1"},
+                                "status": "released",
+                            }
+                        ],
+                    },
+                    {
                         "@id": "exp3",
                         "assay_title": "DNase-seq",
                         "replicates": [
@@ -219,6 +237,7 @@ def test_main(mocker):
                 "https://d.na/tf_chip_1",
                 "https://d.na/histone_chip_1",
                 "https://d.na/dnase",
+                "https://a.tac/1",
             ],
         ),
         (

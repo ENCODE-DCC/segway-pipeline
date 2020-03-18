@@ -11,7 +11,7 @@ PORTAL_URL = "https://www.encodeproject.org/"
 WORKFLOW_NAME = "segway"
 EXCLUDED_STATUSES = ("revoked", "archived", "replaced", "deleted")
 DATASET_OUTPUT_TYPE = {
-    "ATAC-seq": "fold change_over control",
+    "ATAC-seq": "fold change over control",
     "DNase-seq": "read-depth normalized signal",
     "Histone ChIP-seq": "fold change over control",
     "TF ChIP-seq": "fold change over control",
