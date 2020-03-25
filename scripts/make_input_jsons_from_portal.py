@@ -43,6 +43,7 @@ class UrlJoiner:
 def main() -> None:
     parser = get_parser()
     args = parser.parse_args()
+    validate_args(args)
     keypair = get_keypair(args.keypair)
     urljoiner = UrlJoiner(PORTAL_URL)
     epigenome_id = (
@@ -66,6 +67,16 @@ def main() -> None:
     input_json = make_input_json(portal_files, extra_props)
     outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
     write_json(input_json, outfile)
+
+
+def validate_args(args: argparse.Namespace) -> None:
+    if args.skip_assays is not None:
+        for assay_title in args.skip_assays:
+            valid_assays = list(DATASET_OUTPUT_TYPE.keys())
+            if assay_title not in valid_assays:
+                raise ValueError(
+                    f"Must specify a valid assay type to skip, options are {valid_assays}"
+                )
 
 
 def get_keypair(keypair_path: Optional[str]) -> Optional[Tuple[str, str]]:
@@ -92,6 +103,7 @@ def get_portal_files(
     chip_targets: Optional[List[str]] = None,
 ) -> List[str]:
     datasets_files: Dict[str, str] = {}
+    found_targets: List[str] = []
     for dataset in reference_epigenome["related_datasets"]:
         assay_title = dataset["assay_title"]
         at_id = dataset["@id"]
@@ -105,6 +117,7 @@ def get_portal_files(
                 target = dataset["target"]["label"]
                 if target not in chip_targets:
                     continue
+                found_targets.append(target)
         bioreps = set(
             i["biological_replicate_number"]
             for i in filter_by_status(dataset["replicates"])
@@ -133,6 +146,12 @@ def get_portal_files(
                             f"{datasets_files[at_id]}"
                         )
                     )
+    if chip_targets is not None:
+        diff = set(chip_targets).difference(set(found_targets))
+        if len(diff) != 0:
+            raise ValueError(
+                f"Could not find all of the specified ChIP targets in the reference epigenome provided, missing {diff}"
+            )
     return list(datasets_files.values())
 
 
