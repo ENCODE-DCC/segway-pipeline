@@ -55,7 +55,9 @@ def main() -> None:
     )
     reference_epigenome = get_json(reference_epigenome_url, auth=keypair)
     assembly = get_assembly(chrom_sizes_url)
-    portal_files = get_portal_files(reference_epigenome, assembly, urljoiner)
+    portal_files = get_portal_files(
+        reference_epigenome, assembly, urljoiner, args.skip_assays, args.chip_targets
+    )
     chrom_sizes_s3_url = get_url_for_file(chrom_sizes_url)
     annotation_s3_url = get_url_for_file(annotation_url)
     extra_props = get_extra_props_from_args(
@@ -83,7 +85,11 @@ def get_keypair(keypair_path: Optional[str]) -> Optional[Tuple[str, str]]:
 
 
 def get_portal_files(
-    reference_epigenome: Dict[str, Any], assembly: str, urljoiner: UrlJoiner
+    reference_epigenome: Dict[str, Any],
+    assembly: str,
+    urljoiner: UrlJoiner,
+    skip_assays: Optional[List[str]] = None,
+    chip_targets: Optional[List[str]] = None,
 ) -> List[str]:
     datasets_files: Dict[str, str] = {}
     for dataset in reference_epigenome["related_datasets"]:
@@ -91,6 +97,14 @@ def get_portal_files(
         at_id = dataset["@id"]
         if assay_title not in DATASET_OUTPUT_TYPE.keys():
             continue
+        if skip_assays is not None:
+            if assay_title in skip_assays:
+                continue
+        if chip_targets is not None:
+            if assay_title in ("Histone ChIP-seq", "TF ChIP-seq"):
+                target = dataset["target"]["label"]
+                if target not in chip_targets:
+                    continue
         bioreps = set(
             i["biological_replicate_number"]
             for i in filter_by_status(dataset["replicates"])
@@ -131,6 +145,8 @@ def get_extra_props_from_args(
     extra_props.pop("accession")
     extra_props.pop("outfile", None)
     extra_props.pop("keypair", None)
+    extra_props.pop("chip_targets", None)
+    extra_props.pop("skip_assays", None)
     extra_props["chrom_sizes"] = chrom_sizes_url
     extra_props["annotation_gtf"] = annotation_url
     return extra_props
@@ -224,10 +240,26 @@ def get_parser() -> argparse.ArgumentParser:
         help="Accession of reference epigenome on the ENCODE portal",
     )
     parser.add_argument(
+        "--skip-assays",
+        nargs="+",
+        help="Assays that should be skipped when generating input JSONs",
+    )
+    parser.add_argument(
+        "--chip-targets",
+        nargs="+",
+        help="List of ChIP targets to restrict Segway input bigwigs to, e.g. H3K27ac, POL2RA",
+    )
+    parser.add_argument(
         "-n",
         "--num-segway-cpus",
         type=int,
         help="Number of cpus to use for Segway training and annotation, if not specified will use pipeline defaults",
+    )
+    parser.add_argument(
+        "-r",
+        "--resolution",
+        type=int,
+        help="Resolution, in base pairs, for Segway training, if not specified will use pipeline defaults",
     )
     parser.add_argument(
         "-f",
@@ -236,7 +268,7 @@ def get_parser() -> argparse.ArgumentParser:
         help="Fraction of genome to sample for each round of training, if not specified will use pipeline defaults",
     )
     parser.add_argument(
-        "-r",
+        "-m",
         "--max-train-rounds",
         type=int,
         help="Maximum number of rounds for Segway training, if not specified will use pipeline defaults",
