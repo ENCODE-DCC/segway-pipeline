@@ -1,3 +1,4 @@
+import argparse
 import builtins
 from contextlib import suppress as does_not_raise
 from typing import List
@@ -19,6 +20,7 @@ from scripts.make_input_jsons_from_portal import (
     get_url_from_file_obj,
     main,
     make_input_json,
+    validate_args,
     write_json,
 )
 
@@ -26,6 +28,11 @@ from scripts.make_input_jsons_from_portal import (
 @pytest.fixture
 def urljoiner():
     return UrlJoiner("https://www.qux.io/")
+
+
+@pytest.fixture
+def assembly():
+    return "GRCh38"
 
 
 def test_urljoiner_init():
@@ -66,7 +73,7 @@ def test_main(mocker):
             "my_accession",
             "-f",
             "0.1",
-            "-r",
+            "-m",
             "5",
             "-g",
             "gtf",
@@ -121,6 +128,17 @@ def test_main(mocker):
         'way.minibatch_fraction": 0.1,\n    "segway.max_train_rounds": 5,\n    "segway.'
         'annotation_gtf": "foo",\n    "segway.chrom_sizes": "bar"\n}'
     )
+
+
+@pytest.mark.parametrize(
+    "condition,skip_assays",
+    [(does_not_raise(), ["DNase-seq"]), (pytest.raises(ValueError), ["DNase"])],
+)
+def test_validate_args(condition, skip_assays):
+    args = argparse.Namespace()
+    args.skip_assays = skip_assays
+    with condition:
+        validate_args(args)
 
 
 @pytest.mark.parametrize(
@@ -352,6 +370,151 @@ def test_get_portal_files(
     with condition:
         result = get_portal_files(reference_epigenome, assembly, urljoiner)
         assert sorted(result) == sorted(expected)
+
+
+def test_get_portal_files_chip_targets(urljoiner, assembly):
+    reference_epigenome = {
+        "related_datasets": [
+            {
+                "@id": "exp3",
+                "assay_title": "Histone ChIP-seq",
+                "replicates": [
+                    {"biological_replicate_number": 1, "status": "released"}
+                ],
+                "target": {"label": "H3K27ac"},
+                "files": [
+                    {
+                        "@id": "file1",
+                        "assembly": "GRCh38",
+                        "output_type": "fold change over control",
+                        "file_format": "bigWig",
+                        "biological_replicates": [1],
+                        "status": "released",
+                        "cloud_metadata": {"url": "https://file.1"},
+                    }
+                ],
+            },
+            {
+                "@id": "exp4",
+                "assay_title": "TF ChIP-seq",
+                "replicates": [
+                    {"biological_replicate_number": 1, "status": "released"}
+                ],
+                "target": {"label": "EP300"},
+                "files": [
+                    {
+                        "@id": "file2",
+                        "assembly": "GRCh38",
+                        "output_type": "fold change over control",
+                        "file_format": "bigWig",
+                        "biological_replicates": [1],
+                        "status": "released",
+                        "cloud_metadata": {"url": "https://file.2"},
+                    }
+                ],
+            },
+            {
+                "@id": "exp4",
+                "assay_title": "TF ChIP-seq",
+                "replicates": [
+                    {"biological_replicate_number": 1, "status": "released"}
+                ],
+                "target": {"label": "NANOG"},
+                "files": [
+                    {
+                        "@id": "file3",
+                        "assembly": "GRCh38",
+                        "output_type": "fold change over control",
+                        "file_format": "bigWig",
+                        "biological_replicates": [1],
+                        "status": "released",
+                        "cloud_metadata": {"url": "https://file.3"},
+                    }
+                ],
+            },
+        ]
+    }
+    result = get_portal_files(
+        reference_epigenome, assembly, urljoiner, chip_targets=["H3K27ac", "EP300"]
+    )
+    assert sorted(result) == sorted(["https://file.1", "https://file.2"])
+
+
+def test_get_portal_files_missing_chip_target_raises(urljoiner, assembly):
+    reference_epigenome = {
+        "related_datasets": [
+            {
+                "@id": "exp3",
+                "assay_title": "Histone ChIP-seq",
+                "replicates": [
+                    {"biological_replicate_number": 1, "status": "released"}
+                ],
+                "target": {"label": "H3K27ac"},
+                "files": [
+                    {
+                        "@id": "file1",
+                        "assembly": "GRCh38",
+                        "output_type": "fold change over control",
+                        "file_format": "bigWig",
+                        "biological_replicates": [1],
+                        "status": "released",
+                        "cloud_metadata": {"url": "https://file.1"},
+                    }
+                ],
+            }
+        ]
+    }
+    with pytest.raises(ValueError):
+        get_portal_files(reference_epigenome, assembly, urljoiner, chip_targets=["foo"])
+
+
+def test_get_portal_files_skip_assays(urljoiner, assembly):
+    reference_epigenome = {
+        "related_datasets": [
+            {
+                "@id": "exp3",
+                "assay_title": "Histone ChIP-seq",
+                "replicates": [
+                    {"biological_replicate_number": 1, "status": "released"}
+                ],
+                "target": {"label": "H3K27ac"},
+                "files": [
+                    {
+                        "@id": "file1",
+                        "assembly": "GRCh38",
+                        "output_type": "fold change over control",
+                        "file_format": "bigWig",
+                        "biological_replicates": [1],
+                        "status": "released",
+                        "cloud_metadata": {"url": "https://file.1"},
+                    }
+                ],
+            },
+            {
+                "@id": "exp4",
+                "assay_title": "TF ChIP-seq",
+                "replicates": [
+                    {"biological_replicate_number": 1, "status": "released"}
+                ],
+                "target": {"label": "EP300"},
+                "files": [
+                    {
+                        "@id": "file2",
+                        "assembly": "GRCh38",
+                        "output_type": "fold change over control",
+                        "file_format": "bigWig",
+                        "biological_replicates": [1],
+                        "status": "released",
+                        "cloud_metadata": {"url": "https://file.2"},
+                    }
+                ],
+            },
+        ]
+    }
+    result = get_portal_files(
+        reference_epigenome, assembly, urljoiner, skip_assays=["TF ChIP-seq"]
+    )
+    assert result == ["https://file.1"]
 
 
 @pytest.mark.parametrize(
