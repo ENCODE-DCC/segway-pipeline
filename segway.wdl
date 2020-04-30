@@ -64,6 +64,7 @@ workflow segway {
     File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
 
     call segtools { input:
+        genomedata = select_first([genomedata, make_genomedata.genomedata]),
         segway_output_bed = segway_output_bed_,
         annotation_gtf = annotation_gtf,
         segway_params = segway_params_,
@@ -178,6 +179,7 @@ task segway_annotate {
 }
 
 task segtools {
+    File genomedata
     File segway_output_bed
     File annotation_gtf
     File segway_params
@@ -187,13 +189,14 @@ task segtools {
         segtools-length-distribution -o length_distribution ${segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
         segtools-aggregation --normalize -o feature_aggregation --mode=gene ${segway_output_bed} ${annotation_gtf}
-        # TODO: add SAGA interpretation
+        segtools-signal-distribution -o signal_distribution ${segway_output_bed} ${genomedata}
     }
 
     output {
         Array[File] length_distribution_info = glob("length_distribution/*")
         Array[File] gmtk_info = glob("gmtk_parameters/*")
         Array[File] feature_aggregation_info = glob("feature_aggregation/*")
+        Array[File] signal_distribution_info = glob("signal_distribution/*")
     }
 
     runtime {
