@@ -1,29 +1,33 @@
+version 1.0
+
 #CAPER docker quay.io/encode-dcc/segway:0.1.0
 #CAPER singularity docker://quay.io/encode-dcc/segway:0.1.0
 
 workflow segway {
-    # Pipeline inputs to run from beginning
-    Array[File]? bigwigs
-    File? chrom_sizes
-    File annotation_gtf
+    input {
+        # Pipeline inputs to run from beginning
+        Array[File]? bigwigs
+        File? chrom_sizes
+        File annotation_gtf
 
-    # Segway resource parameter
-    Int num_segway_cpus = 96
+        # Segway resource parameter
+        Int num_segway_cpus = 96
 
-    # Segway training hyperparameters. First three defaults taken from Libbrecht et al 2019
-    Int resolution = 100
-    Float minibatch_fraction = 0.01
-    Int max_train_rounds = 25
-    Int num_instances = 10
-    Float prior_strength = 1
-    Float? segtransition_weight_scale
+        # Segway training hyperparameters. First three defaults taken from Libbrecht et al 2019
+        Int resolution = 100
+        Float minibatch_fraction = 0.01
+        Int max_train_rounds = 25
+        Int num_instances = 10
+        Float prior_strength = 1
+        Float? segtransition_weight_scale
 
-    # Optional inputs for starting the pipeline not from the beginning
-    File? genomedata
-    Int? num_labels
-    File? segway_traindir
-    File? segway_output_bed
-    File? segway_params
+        # Optional inputs for starting the pipeline not from the beginning
+        File? genomedata
+        Int? num_labels
+        File? segway_traindir
+        File? segway_output_bed
+        File? segway_params
+    }
 
     Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes)
     Boolean has_segtools_input = defined(segway_output_bed) && defined(segway_params)
@@ -72,13 +76,15 @@ workflow segway {
 }
 
 task make_genomedata {
-    Array[File] bigwigs
-    File chrom_sizes
-
-    command {
-        python "$(which make_genomedata.py)" --files ${sep=" " bigwigs} --sizes ${chrom_sizes} -o files.genomedata
-        python "$(which calculate_num_labels.py)" --num-tracks ${length(bigwigs)} -o num_labels.txt
+    input {
+        Array[File] bigwigs
+        File chrom_sizes
     }
+
+    command <<<
+        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} -o files.genomedata
+        python "$(which calculate_num_labels.py)" --num-tracks ~{length(bigwigs)} -o num_labels.txt
+    >>>
 
     output {
         File genomedata = glob("files.genomedata")[0]
@@ -94,32 +100,34 @@ task make_genomedata {
 }
 
 task segway_train {
-    File genomedata
-    Int num_labels
-    Int ncpus
-    Int resolution
-    Float minibatch_fraction
-    Int max_train_rounds
-    Int num_instances
-    Float? prior_strength
-    Float segtransition_weight_scale
+    input {
+        File genomedata
+        Int num_labels
+        Int ncpus
+        Int resolution
+        Float minibatch_fraction
+        Int max_train_rounds
+        Int num_instances
+        Float? prior_strength
+        Float segtransition_weight_scale
+    }
 
-    command {
+    command <<<
         mkdir tmp
-        export TMPDIR="$PWD/tmp"
+        export TMPDIR="${PWD}/tmp"
         export SEGWAY_RAND_SEED=112344321
-        export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
+        export SEGWAY_NUM_LOCAL_JOBS=~{ncpus}
         export OMP_NUM_THREADS=1
         mkdir traindir
         SEGWAY_CLUSTER=local segway train \
-            --num-labels ${num_labels} \
-            --resolution ${resolution} \
-            --minibatch-fraction ${minibatch_fraction} \
-            --num-instances ${num_instances} \
-            ${if defined(prior_strength) then "--prior_strength " + prior_strength else ""} \
-            --segtransition-weight-scale ${segtransition_weight_scale} \
-            --max-train-rounds ${max_train_rounds} \
-            ${genomedata} traindir
+            --num-labels ~{num_labels} \
+            --resolution ~{resolution} \
+            --minibatch-fraction ~{minibatch_fraction} \
+            --num-instances ~{num_instances} \
+            ~{if defined(prior_strength) then "--prior_strength " + prior_strength else ""} \
+            --segtransition-weight-scale ~{segtransition_weight_scale} \
+            --max-train-rounds ~{max_train_rounds} \
+            ~{genomedata} traindir
         # See https://stackoverflow.com/a/54908072 and
         # https://reproducible-builds.org/docs/archives/. Want to make tar idempotent
         find traindir -print0 |
@@ -128,7 +136,7 @@ task segway_train {
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf traindir.tar
         gzip -nc traindir.tar > traindir.tar.gz
-    }
+    >>>
 
     output {
         File traindir = glob("traindir.tar.gz")[0]
@@ -144,26 +152,28 @@ task segway_train {
 }
 
 task segway_annotate {
-    File genomedata
-    File traindir
-    Int ncpus
+    input {
+        File genomedata
+        File traindir
+        Int ncpus
+    }
 
-    command {
+    command <<<
         mkdir tmp
-        export TMPDIR="$PWD/tmp"
+        export TMPDIR="${PWD}/tmp"
         export SEGWAY_RAND_SEED=112344321
-        export SEGWAY_NUM_LOCAL_JOBS=${ncpus}
+        export SEGWAY_NUM_LOCAL_JOBS=~{ncpus}
         export OMP_NUM_THREADS=1
-        mkdir traindir && tar xf ${traindir} -C traindir --strip-components 1
+        mkdir traindir && tar xf ~{traindir} -C traindir --strip-components 1
         mkdir identifydir
-        SEGWAY_CLUSTER=local segway annotate ${genomedata} --bed=segway.bed.gz traindir identifydir
+        SEGWAY_CLUSTER=local segway annotate ~{genomedata} --bed=segway.bed.gz traindir identifydir
         find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master|params/params.params|segway.str|triangulation)($|/.*)' -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf training_params.tar
         gzip -nc training_params.tar > training_params.tar.gz
-}
+    >>>
 
     output {
         File segway_params = glob("training_params.tar.gz")[0]
@@ -179,18 +189,20 @@ task segway_annotate {
 }
 
 task segtools {
-    File genomedata
-    File segway_output_bed
-    File annotation_gtf
-    File segway_params
-
-    command {
-        mkdir segway_params && tar xf ${segway_params} -C segway_params --strip-components 1
-        segtools-length-distribution -o length_distribution ${segway_output_bed}
-        segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
-        segtools-aggregation --normalize -o feature_aggregation --mode=gene ${segway_output_bed} ${annotation_gtf}
-        segtools-signal-distribution -o signal_distribution ${segway_output_bed} ${genomedata}
+    input {
+        File genomedata
+        File segway_output_bed
+        File annotation_gtf
+        File segway_params
     }
+
+    command <<<
+        mkdir segway_params && tar xf ~{segway_params} -C segway_params --strip-components 1
+        segtools-length-distribution -o length_distribution ~{segway_output_bed}
+        segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
+        segtools-aggregation --normalize -o feature_aggregation --mode=gene ~{segway_output_bed} ~{annotation_gtf}
+        segtools-signal-distribution -o signal_distribution ~{segway_output_bed} ~{genomedata}
+    >>>
 
     output {
         Array[File] length_distribution_info = glob("length_distribution/*")
