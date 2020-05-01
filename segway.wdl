@@ -30,8 +30,7 @@ workflow segway {
     }
 
     Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes)
-    Boolean has_segtools_input = defined(segway_output_bed) && defined(segway_params)
-    # We need a genomedata for everything except segtools
+    Boolean has_segtools_input = defined(segway_output_bed) && defined(segway_params) && defined(genomedata)
     if (!defined(genomedata) && !has_segtools_input && has_make_genomedata_input) {
         call make_genomedata { input:
             bigwigs = select_all([bigwigs])[0],
@@ -201,6 +200,8 @@ task segtools {
         segtools-length-distribution -o length_distribution ~{segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
         segtools-aggregation --normalize -o feature_aggregation --mode=gene ~{segway_output_bed} ~{annotation_gtf}
+        # TODO: undo temporary env fix once segtools is patched
+        conda activate segtools-signal-distribution
         segtools-signal-distribution -o signal_distribution ~{segway_output_bed} ~{genomedata}
     >>>
 
