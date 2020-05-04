@@ -7,6 +7,7 @@ LABEL maintainer.email "encode-help@lists.stanford.edu"
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH /opt/conda/bin:$PATH
+ENV SEGTOOLS_VERSION="1.2.4"
 
 # libkrb5-dev needed for bigWigToBedGraph generation during genomedata creation to work
 RUN apt-get update && apt-get install -y \
@@ -22,7 +23,11 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
-RUN conda install -y -c bioconda segway==3.0 segtools==1.2.4 numpy==1.16.4 && \
+# segtools-signal-distribution spuriously fails with Python 3, see
+# https://bitbucket.org/hoffmanlab/segtools/issues/58/segtools-signal-distribution-fails-with
+RUN conda install -y -c bioconda segway==3.0 segtools=="${SEGTOOLS_VERSION}" numpy==1.16.4 && \
+    conda create -y -n segtools-signal-distribution python=2.7 && \
+    conda install -n segtools-signal-distribution -y -c bioconda segtools=="${SEGTOOLS_VERSION}" && \
     conda clean -afy
 
 # It was a pain to try to get the conda-installed bigWigToBedGraph to work. Instead we
