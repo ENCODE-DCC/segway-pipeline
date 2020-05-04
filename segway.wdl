@@ -201,7 +201,7 @@ task segtools {
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
         segtools-aggregation --normalize -o feature_aggregation --mode=gene ~{segway_output_bed} ~{annotation_gtf}
         # TODO: undo temporary env fix once segtools is patched. Use conda run to avoid bashrc wackiness
-        conda run -n segtools-signal-distribution segtools-signal-distribution -o signal_distribution ~{segway_output_bed} ~{genomedata}
+        conda run -n segtools-signal-distribution segtools-signal-distribution --transformation arcsinh -o signal_distribution ~{segway_output_bed} ~{genomedata}
     >>>
 
     output {
