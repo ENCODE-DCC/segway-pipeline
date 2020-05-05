@@ -35,6 +35,6 @@ RUN conda install -y -c bioconda segway==3.0 segtools=="${SEGTOOLS_VERSION}" num
 # didn't like me trying to upgrade the ucsc-bigwigtobedgraph to 377, got conflicts.
 # Possibly related: https://github.com/bioconda/bioconda-recipes/issues/14724
 COPY bin/* /utils/
-COPY segway/* /software/
+COPY segway_pipeline/* /software/
 
 ENV PATH=/utils:/software:$PATH

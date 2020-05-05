@@ -1,6 +1,9 @@
 # segway
 
-[![Docker Repository on Quay](https://quay.io/repository/encode-dcc/segway/status "Docker Repository on Quay")](https://quay.io/repository/encode-dcc/segway)
+[![CircleCI](https://circleci.com/gh/ENCODE-DCC/segway-pipeline/tree/dev.svg?style=svg)](https://circleci.com/gh/ENCODE-DCC/segway-pipeline/tree/dev)
+[![Docker Repository on Quay](https://quay.io/repository/encode-dcc/segway-pipeline/status "Docker Repository on Quay")](https://quay.io/repository/encode-dcc/segway-pipeline)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![MIT License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ## Description
 
