@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-from segway.make_genomedata import get_parser, main, make_command
+from segway_pipeline.make_genomedata import get_parser, main, make_command
 
 
 def test_make_command():
