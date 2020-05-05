@@ -35,7 +35,6 @@ commands:
           command: |
             echo "export SEGWAY_DOCKER_IMAGE_TAG=quay.io/encode-dcc/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
             echo "export QUAY_REPO=segway-pipeline" >> ${BASH_ENV}
-            echo "export DOCKERFILE_DIR=docker_image" >> ${BASH_ENV}
 
   get_pipeline_version:
     description: get pipeline version from __init__.py
@@ -105,7 +104,7 @@ jobs:
               --build-arg BUILD_TAG=${SEGWAY_DOCKER_IMAGE_TAG} \
               -t ${SEGWAY_DOCKER_IMAGE_TAG} \
               -t quay.io/encode-dcc/${QUAY_REPO}:template \
-              -f ${DOCKERFILE_DIR}/Dockerfile .
+              -f Dockerfile .
             docker push ${SEGWAY_DOCKER_IMAGE_TAG}
             docker logout
 
