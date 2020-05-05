@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-from segway.calculate_num_labels import calculate_num_labels, get_parser, main
+from segway_pipeline.calculate_num_labels import calculate_num_labels, get_parser, main
 
 
 @pytest.mark.parametrize(
