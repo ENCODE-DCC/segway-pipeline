@@ -13,7 +13,7 @@ A pipeline to run [Segway](https://segway.hoffmanlab.org/) and [Segtools](https:
 
 1) Git clone this pipeline.
     ```bash
-    $ git clone https://github.com/ENCODE-DCC/segway
+    $ git clone https://github.com/ENCODE-DCC/segway-pipeline.git
     ```
 
 2) Install [Caper](https://github.com/ENCODE-DCC/caper), requires `java` > 1.8 and `python` > 3.4.1 . Caper is a python wrapper for [Cromwell](https://github.com/broadinstitute/cromwell).
@@ -26,7 +26,7 @@ A pipeline to run [Segway](https://segway.hoffmanlab.org/) and [Segtools](https:
 
 ## Usage
 
-`cd` to the `segway` repository cloned in the installation, and run the following:
+`cd` to the `segway-pipeline` repository cloned in the installation, and run the following:
 
 ```bash
 $ caper run segway.wdl -i ${INPUT_JSON} -o workflow_opts/docker.json -b ${BACKEND}
