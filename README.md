@@ -43,3 +43,7 @@ An example usage is given below. The values for `--chrom-sizes` and `--annotatio
 ```bash
 python scripts/make_input_jsons_from_portal.py --chrom-sizes GRCh38_EBV.chrom.sizes --annotation-gtf gencode.v29.primary_assembly.annotation_UCSC_names  --skip-assays "TF ChIP-seq" --chip-targets H3K4me3 H3K27ac -a ENCSR867OGI
 ```
+
+## Development
+
+See the [developer docs](docs/development.md) for more details on running tests and developing this pipeline.
