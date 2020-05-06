@@ -1,0 +1,14 @@
+- name: test_segtools
+  tags:
+    - unit
+  command: >-
+    tests/caper_run.sh
+    tests/unit/wdl/test_segtools.wdl
+    tests/unit/json/test_segtools.json
+  stdout:
+    contains:
+      - "tar xf"
+      - "-o length_distribution"
+      - "--mode=gene"
+      - "--transformation arcsinh -o signal_distribution"
+      - "dummy.txt"

@@ -1,0 +1,10 @@
+{
+  "test_segway_train.genomedata": "tests/data/dummy.txt",
+  "test_segway_train.max_train_rounds": 25,
+  "test_segway_train.minibatch_fraction": 0.01,
+  "test_segway_train.ncpus": 4,
+  "test_segway_train.num_instances": 3,
+  "test_segway_train.num_labels": 2,
+  "test_segway_train.resolution": 100,
+  "test_segway_train.segtransition_weight_scale": 5
+}

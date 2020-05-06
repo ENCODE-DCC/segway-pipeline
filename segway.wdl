@@ -86,7 +86,7 @@ task make_genomedata {
     >>>
 
     output {
-        File genomedata = glob("files.genomedata")[0]
+        File genomedata = "files.genomedata"
         Int num_labels = read_int("num_labels.txt")
         Int num_tracks = length(bigwigs)
     }

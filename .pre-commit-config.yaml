@@ -35,6 +35,7 @@
       - id: debug-statements
       - id: check-json
       - id: pretty-format-json
+        exclude: 'tests\/data\/.+\.json$'
         args:
           - --autofix
       - id: check-yaml

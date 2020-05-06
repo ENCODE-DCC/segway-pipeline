@@ -1,0 +1,9 @@
+- name: test_make_genomedata_integration
+  tags:
+    - integration
+  command: >-
+    tests/caper_run.sh
+    tests/integration/wdl/test_make_genomedata.wdl
+    tests/integration/json/test_make_genomedata.json
+  files:
+    - path: "test-output/files.genomedata"

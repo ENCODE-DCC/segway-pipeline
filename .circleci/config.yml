@@ -8,9 +8,9 @@ machine_defaults: &machine_defaults
     image: ubuntu-1604:201903-01
   working_directory: ~/ENCODE-DCC/segway-pipeline
 
-py36: &py36
+py37: &py37
   docker:
-    - image: circleci/python:3.6.9-stretch
+    - image: circleci/python:3.7.6-stretch
   working_directory: ~/ENCODE-DCC/segway-pipeline
 
 commands:
@@ -44,21 +44,28 @@ commands:
             PIPELINE_VERSION=$(python -c "import segway_pipeline;print(segway_pipeline.__version__)")
             echo "export PIPELINE_VERSION=${PIPELINE_VERSION}" >> ${BASH_ENV}
 
+  install_h5diff:
+    description: intall h5diff HDF5 tool
+    steps:
+      - run:
+          command: |
+            sudo apt-get install -y hdf5-tools
+
 version: 2.1
 jobs:
   lint:
-    <<: *py36
+    <<: *py37
     steps:
       - checkout
       - run_tox:
           toxenv: "lint"
 
-  test_py36:
-    <<: *py36
+  test_py37:
+    <<: *py37
     steps:
       - checkout
       - run_tox:
-          toxenv: "py36"
+          toxenv: "py37"
 
   test_wdl:
     <<: *machine_defaults
@@ -78,6 +85,7 @@ jobs:
     steps:
       - checkout
       - set_environment_variables
+      - install_h5diff
       - run:
           name: Run pytest-workflow WDL tests using tox
           command: |
@@ -132,26 +140,25 @@ workflows:
     jobs:
       - build
       - lint
-      - test_py36:
+      - test_py37:
           requires:
             - build
             - lint
-    #   Currently no WDL tests, TODO add back when WDL tests are added.
-    #   - test_wdl:
-    #       name: test_wdl_unit
-    #       tag: "unit"
-    #       num_parallel_workflows: 8
-    #       requires:
-    #         - build
-    #         - lint
-    #   - test_wdl:
-    #       name: test_wdl_integration
-    #       resource_class: large
-    #       tag: "integration"
-    #       num_parallel_workflows: 8
-    #       requires:
-    #         - build
-    #         - lint
+      - test_wdl:
+          name: test_wdl_unit
+          tag: "unit"
+          num_parallel_workflows: 8
+          requires:
+            - build
+            - lint
+      - test_wdl:
+          name: test_wdl_integration
+          resource_class: large
+          tag: "integration"
+          num_parallel_workflows: 8
+          requires:
+            - build
+            - lint
     #   - test_wdl:
     #       name: test_wdl_functional
     #       resource_class: xlarge
@@ -168,7 +175,7 @@ workflows:
                 - master
           requires:
             # Currently no WDL tests, TODO add back when WDL tests are added.
-            # - test_wdl_unit
-            # - test_wdl_integration
+            - test_wdl_unit
+            - test_wdl_integration
             # - test_wdl_functional
-            - test_py36
+            - test_py37
