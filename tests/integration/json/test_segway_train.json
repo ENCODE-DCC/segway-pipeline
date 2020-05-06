@@ -1,9 +1,9 @@
 {
   "test_segway_train.genomedata": "tests/data/files.genomedata",
-  "test_segway_train.max_train_rounds": 25,
-  "test_segway_train.minibatch_fraction": 0.01,
-  "test_segway_train.ncpus": 1,
-  "test_segway_train.num_instances": 10,
+  "test_segway_train.max_train_rounds": 5,
+  "test_segway_train.minibatch_fraction": 0.1,
+  "test_segway_train.ncpus": 8,
+  "test_segway_train.num_instances": 2,
   "test_segway_train.num_labels": 10,
   "test_segway_train.resolution": 100,
   "test_segway_train.segtransition_weight_scale": 1

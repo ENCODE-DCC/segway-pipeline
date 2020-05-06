@@ -1,7 +1,9 @@
 import gzip
 import hashlib
+import shutil
 import subprocess
 from pathlib import Path
+from typing import Union
 
 import pytest
 
@@ -29,6 +31,53 @@ def genomedatas_match():
 
 
 @pytest.fixture
+def traindirs_match(skip_n_lines_md5):
+    """
+    Within the traindir, the generated shell scripts in the `cmdline` will be
+    nondeterministic, since they contain Cromwell file paths. Within `log`, similar
+    nondeterminism occurs with the run scripts there and the job logs, however
+    jt_info.txt, likelihood.0.tab, and likelihood.1.tab can still be compared (for 2
+    parallel training runs). File in the `output` folder seem to have the same contents,
+    but the filenames aren't the same so you can't reliably compare them. The files in
+    the `triangulation` folder contain a timestamp at line 17, so need to skip that line
+    when comparing.
+    """
+
+    def _traindirs_match(traindir1: Path, traindir2: Path, workflow_dir: Path) -> bool:
+        traindir1_extracted = workflow_dir / "traindir1"
+        traindir2_extracted = workflow_dir / "traindir2"
+        shutil.unpack_archive(traindir1, extract_dir=traindir1_extracted)
+        shutil.unpack_archive(traindir2, extract_dir=traindir2_extracted)
+        f2_paths = [i for i in traindir2_extracted.glob("**/*") if i.is_file()]
+        for f1 in traindir1_extracted.glob("**/*"):
+            if not f1.is_file():
+                continue
+            if "cmdline" in f1.parts or "output" in f1.parts:
+                continue
+            if "log" in f1.parts:
+                if not f1.match("*.tab") or not f1.match("jt_info.txt"):
+                    continue
+            shared_root_index = f1.parts.index("traindir")
+            f2 = [
+                i
+                for i in f2_paths
+                if i.parts[shared_root_index:] == f1.parts[shared_root_index:]
+            ][0]
+            if "triangulation" in f1.parts:
+                n_lines = 17
+                # if skip_n_lines_md5(f1, n_lines) != skip_n_lines_md5(f2, n_lines):
+                #     return False
+                assert skip_n_lines_md5(f1, n_lines) == skip_n_lines_md5(f2, n_lines)
+            # if md5sum(f1) != md5sum(f2):
+            #     return False
+            else:
+                assert md5sum(f1) == md5sum(f2)
+        return True
+
+    return _traindirs_match
+
+
+@pytest.fixture
 def skip_n_lines_md5():
     """
     Text files can sometimes contain nondeterministic data in the headers. This fixture
@@ -48,5 +97,17 @@ def skip_n_lines_md5():
     return _skip_n_lines_md5
 
 
-def md5sum(file: str) -> str:
-    return hashlib.md5(file.encode()).hexdigest()
+def md5sum(file: Union[str, Path]) -> str:
+    """
+    Compute the md5sum of a string, a text file, or a binary file.
+    """
+    if isinstance(file, str):
+        return hashlib.md5(file.encode()).hexdigest()
+    try:
+        with open(file) as f:
+            data = f.read()
+            return hashlib.md5(data.encode()).hexdigest()
+    except UnicodeDecodeError:
+        with open(file, "rb") as f:
+            data = f.read()
+            return hashlib.md5(data).hexdigest()
