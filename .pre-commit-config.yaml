@@ -1,3 +1,4 @@
+---
   - repo: https://github.com/psf/black
     rev: 19.3b0
     hooks:
@@ -35,7 +36,13 @@
       - id: debug-statements
       - id: check-json
       - id: pretty-format-json
-        exclude: 'tests\/data\/.+\.json$'
+        exclude: tests\/data\/.+\.json$
         args:
           - --autofix
       - id: check-yaml
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.0.10
+    hooks:
+      - id: yamlfmt
+        args: [--mapping, '2', --sequence, '4', --offset, '2']

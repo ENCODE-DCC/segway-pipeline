@@ -1,0 +1,11 @@
+---
+  - name: test_segway_train_integration
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_segway_train.wdl
+      tests/integration/json/test_segway_train.json
+    files:
+      - path: test-output/traindir.tar.gz
+        md5sum: 61a1706d74e6bc8649aa46dd651622fd

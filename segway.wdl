@@ -138,9 +138,9 @@ task segway_train {
     >>>
 
     output {
-        File traindir = glob("traindir.tar.gz")[0]
+        File traindir = "traindir.tar.gz"
         # Checks that the model training actually emitted final params, not used
-        File trained_params = glob("traindir/params/params.params")[0]
+        File trained_params = "traindir/params/params.params"
     }
 
     runtime {

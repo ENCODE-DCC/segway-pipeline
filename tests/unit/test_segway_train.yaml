@@ -1,19 +1,20 @@
-- name: test_segway_train_no_prior_strength
-  tags:
-    - unit
-  command: >-
-    tests/caper_run.sh
-    tests/unit/wdl/test_segway_train.wdl
-    tests/unit/json/test_segway_train.json
-  stdout:
-    contains:
-       - "export SEGWAY_NUM_LOCAL_JOBS=4"
-       - "--num-labels 2"
-       - "--resolution 100"
-       - "--minibatch-fraction 0.01"
-       - "--num-instances 3"
-       - "--segtransition-weight-scale 5"
-       - "--max-train-rounds 25"
-       - "dummy.txt traindir"
-    must_not_contain:
-       - "--prior_strength"
+---
+  - name: test_segway_train_no_prior_strength
+    tags:
+      - unit
+    command: >-
+      tests/caper_run.sh
+      tests/unit/wdl/test_segway_train.wdl
+      tests/unit/json/test_segway_train.json
+    stdout:
+      contains:
+        - export SEGWAY_NUM_LOCAL_JOBS=4
+        - --num-labels 2
+        - --resolution 100
+        - --minibatch-fraction 0.01
+        - --num-instances 3
+        - --segtransition-weight-scale 5
+        - --max-train-rounds 25
+        - dummy.txt traindir
+      must_not_contain:
+        - --prior_strength
