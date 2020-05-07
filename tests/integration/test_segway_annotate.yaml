@@ -1,0 +1,12 @@
+---
+    - name: test_segway_annotate_integration
+      tags:
+        - integration
+      command: >-
+        tests/caper_run.sh
+        tests/integration/wdl/test_segway_annotate.wdl
+        tests/integration/json/test_segway_annotate.json
+      files:
+        - path: test-output/training_params.tar.gz
+          md5sum: 7dca40cee9a6e02b0256eaa137b30896
+        - path: test-output/segway.bed.gz

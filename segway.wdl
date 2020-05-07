@@ -165,18 +165,19 @@ task segway_annotate {
         export OMP_NUM_THREADS=1
         mkdir traindir && tar xf ~{traindir} -C traindir --strip-components 1
         mkdir identifydir
-        SEGWAY_CLUSTER=local segway annotate ~{genomedata} --bed=segway.bed.gz traindir identifydir
+        SEGWAY_CLUSTER=local segway annotate ~{genomedata} --bed=segway.bed traindir identifydir
         find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master|params/params.params|segway.str|triangulation)($|/.*)' -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf training_params.tar
         gzip -nc training_params.tar > training_params.tar.gz
+        gzip -nc segway.bed > segway.bed.gz
     >>>
 
     output {
-        File segway_params = glob("training_params.tar.gz")[0]
-        File output_bed = glob("segway.bed.gz")[0]
+        File segway_params = "training_params.tar.gz"
+        File output_bed = "segway.bed.gz"
         Array[File] logs = glob("identifydir/output/e/identify/*")
     }
 

@@ -93,6 +93,13 @@ def skip_n_lines_md5():
     return _skip_n_lines_md5
 
 
+@pytest.fixture
+def skip_n_lines_and_compare(skip_n_lines_md5):
+    def _skip_n_lines_and_compare(file_1: Path, file_2: Path, n_lines: int) -> bool:
+        return skip_n_lines_md5(file_1, n_lines) == skip_n_lines_md5(file_2, n_lines)
+    return _skip_n_lines_and_compare
+
+
 def md5sum(file: Union[str, Path]) -> str:
     """
     Compute the md5sum of a string, a text file, or a binary file.
