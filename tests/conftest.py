@@ -65,11 +65,7 @@ def traindirs_match(skip_n_lines_md5):
             ][0]
             if "triangulation" in f1.parts:
                 n_lines = 17
-                # if skip_n_lines_md5(f1, n_lines) != skip_n_lines_md5(f2, n_lines):
-                #     return False
                 assert skip_n_lines_md5(f1, n_lines) == skip_n_lines_md5(f2, n_lines)
-            # if md5sum(f1) != md5sum(f2):
-            #     return False
             else:
                 assert md5sum(f1) == md5sum(f2)
         return True
