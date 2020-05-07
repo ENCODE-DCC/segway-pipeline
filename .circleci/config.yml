@@ -53,7 +53,7 @@ commands:
             sudo apt-get install -y hdf5-tools
 
   install_shellcheck:
-    description: "Install shellcheck by downloading the binary, don't want to apt-get update"
+    description: Install shellcheck by downloading the binary, don't want to apt-get update
     steps:
       - run: curl -s https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck /usr/local/bin
 
