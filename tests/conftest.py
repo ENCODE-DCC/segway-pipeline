@@ -104,6 +104,6 @@ def md5sum(file: Union[str, Path]) -> str:
             data = f.read()
             return hashlib.md5(data.encode()).hexdigest()
     except UnicodeDecodeError:
-        with open(file, "rb") as f:
-            data = f.read()
-            return hashlib.md5(data).hexdigest()
+        with open(file, "rb") as g:
+            binary_data = g.read()
+            return hashlib.md5(binary_data).hexdigest()
