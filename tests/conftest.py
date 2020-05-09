@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Union
 
+from diff_pdf_visually import pdfdiff
 import pytest
 
 
@@ -74,6 +75,16 @@ def traindirs_match(skip_n_lines_md5):
 
 
 @pytest.fixture
+def pdfs_match():
+    """
+    Fixture to visually diff PDFs
+    """
+    def _pdfs_match(pdf_1: Path, pdf_2: Path):
+        return pdfdiff(str(pdf_1), str(pdf_2))
+    return _pdfs_match
+
+
+@pytest.fixture
 def skip_n_lines_md5():
     """
     Text files can sometimes contain nondeterministic data in the headers. This fixture
@@ -97,6 +108,7 @@ def skip_n_lines_md5():
 def skip_n_lines_and_compare(skip_n_lines_md5):
     def _skip_n_lines_and_compare(file_1: Path, file_2: Path, n_lines: int) -> bool:
         return skip_n_lines_md5(file_1, n_lines) == skip_n_lines_md5(file_2, n_lines)
+
     return _skip_n_lines_and_compare
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.workflow(name="test_make_genomedata_integration")
+@pytest.mark.workflow("test_make_genomedata_integration")
 def test_make_genomedata_hdf5_files_match(
     test_data_dir, workflow_dir, genomedatas_match
 ):

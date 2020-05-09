@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.workflow(name="test_segway_annotate_integration")
+@pytest.mark.workflow("test_segway_annotate_integration")
 def test_segway_annotate_bed_files_match(
     test_data_dir, workflow_dir, skip_n_lines_and_compare
 ):
