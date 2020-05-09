@@ -5,8 +5,8 @@ import subprocess
 from pathlib import Path
 from typing import Union
 
-from diff_pdf_visually import pdfdiff
 import pytest
+from diff_pdf_visually import pdfdiff
 
 
 @pytest.fixture
@@ -77,10 +77,12 @@ def traindirs_match(skip_n_lines_md5):
 @pytest.fixture
 def pdfs_match():
     """
-    Fixture to visually diff PDFs
+    Fixture to visually diff compare PDFs
     """
+
     def _pdfs_match(pdf_1: Path, pdf_2: Path):
         return pdfdiff(str(pdf_1), str(pdf_2))
+
     return _pdfs_match
 
 
