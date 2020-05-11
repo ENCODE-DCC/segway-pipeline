@@ -9,7 +9,4 @@
     stdout:
       contains:
         - tar xf
-        - -o length_distribution
-        - --mode=gene
-        - --transformation arcsinh -o signal_distribution
         - dummy.txt
