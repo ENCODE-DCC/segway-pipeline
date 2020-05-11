@@ -10,7 +10,7 @@
       - path: test-output/files.genomedata
       - path: test-output/traindir.tar.gz
       - path: test-output/training_params.tar.gz
-        md5sum: 7dca40cee9a6e02b0256eaa137b30896
+        md5sum: fe6d5dcaffb015e02976c620c3b8ea81
       - path: test-output/segway.bed.gz
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.tab
         md5sum: bad9d914dbf02def5e15095508a145a4
