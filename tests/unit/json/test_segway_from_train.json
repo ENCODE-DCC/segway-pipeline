@@ -1,0 +1,6 @@
+{
+  "segway.annotation_gtf": "tests/data/dummy.txt",
+  "segway.genomedata": "tests/data/dummy.txt",
+  "segway.num_labels": 1,
+  "segway.segtransition_weight_scale": 1.0
+}
