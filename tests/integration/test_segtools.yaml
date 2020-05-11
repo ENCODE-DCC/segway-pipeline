@@ -13,13 +13,7 @@
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.tab
         md5sum: e1c15936ff0a14d3524b0cd6d160c88b
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.pdf
-      - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.graph.dot
-        md5sum: 7dca40cee9a6e02b0256eaa137b30896
       - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.pdf
-      - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.stats.csv
-        md5sum: 7dca40cee9a6e02b0256eaa137b30896
-      - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.stats.pdf
-        md5sum: 7dca40cee9a6e02b0256eaa137b30896
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.div
         md5sum: 6bdc458f8fe22e2be265a525a31fefa6
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.splicing.pdf

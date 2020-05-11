@@ -77,7 +77,7 @@ def traindirs_match(skip_n_lines_md5):
 @pytest.fixture
 def pdfs_match():
     """
-    Fixture to visually diff compare PDFs
+    Fixture to visually diff compare PDFs. Requires pdftocairo executable to be on PATH.
     """
 
     def _pdfs_match(pdf_1: Path, pdf_2: Path):

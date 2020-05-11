@@ -46,11 +46,18 @@ commands:
             echo "export PIPELINE_VERSION=${PIPELINE_VERSION}" >> ${BASH_ENV}
 
   install_h5diff:
-    description: intall h5diff HDF5 tool
+    description: install h5diff HDF5 tool
     steps:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install -y hdf5-tools
+
+  install_diff_pdf_visually_dependencies:
+    description: install dependencies for diff-pdf-visually Python packages
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y imagemagick poppler-utils
 
   install_shellcheck:
     description: Install shellcheck by downloading the binary, don't want to apt-get update
@@ -93,6 +100,7 @@ jobs:
       - checkout
       - set_environment_variables
       - install_h5diff
+      - install_diff_pdf_visually_dependencies
       - run:
           name: Run pytest-workflow WDL tests using tox
           command: |
