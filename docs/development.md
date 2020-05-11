@@ -8,7 +8,7 @@ $ pip install tox
 
 In addition, to run WDL tests, you will need to install `h5diff` to be able to compare HDF5 files. On MacOS, this can be accomplished with `brew install hdf5`. On Linux systems with the `apt` package manager, install with `sudo apt-get install hdf5-tools`.
 
-On MacOS, you will further need to install `poppler` and `imagemagick` with `brew install poppler imagemagick` to be able to compare pdfs.
+On MacOS, you will further need to install `poppler` and `imagemagick` with `brew install poppler imagemagick` to be able to compare pdfs. If you have `apt` on Linux you can run `sudo apt-get install -y imagemagick poppler-utils`
 
 ## Running tests
 
