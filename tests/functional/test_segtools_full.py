@@ -52,7 +52,9 @@ def test_segway_full_segment_sizes_pdfs_match(workflow_dir, test_data_dir, pdfs_
 
 
 @pytest.mark.workflow("test_segway_full")
-def test_segway_full_gmtk_parameters_pdfs_match(workflow_dir, test_data_dir, pdfs_match):
+def test_segway_full_gmtk_parameters_pdfs_match(
+    workflow_dir, test_data_dir, pdfs_match
+):
     result = workflow_dir / Path(
         "test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.pdf"
     )

@@ -177,7 +177,7 @@ workflows:
       - test_wdl:
           name: test_wdl_functional
           resource_class: large
-          tag: "functional"
+          tag: functional
           num_parallel_workflows: 8
           requires:
             - build
