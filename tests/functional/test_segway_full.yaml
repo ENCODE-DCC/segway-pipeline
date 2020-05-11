@@ -4,7 +4,7 @@
       - functional
     command: >-
       tests/caper_run.sh
-      tests/functional/wdl/test_segway_full.wdl
+      segway.wdl
       tests/functional/json/test_segway_full.json
     files:
       - path: test-output/files.genomedata
