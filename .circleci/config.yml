@@ -174,14 +174,14 @@ workflows:
           requires:
             - build
             - lint
-    #   - test_wdl:
-    #       name: test_wdl_functional
-    #       resource_class: xlarge
-    #       tag: "functional"
-    #       num_parallel_workflows: 8
-    #       requires:
-    #         - build
-    #         - lint
+      - test_wdl:
+          name: test_wdl_functional
+          resource_class: large
+          tag: "functional"
+          num_parallel_workflows: 8
+          requires:
+            - build
+            - lint
       - push_template:
           filters:
             branches:
