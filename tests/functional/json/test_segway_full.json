@@ -1,0 +1,14 @@
+{
+  "test_segway_full.annotation_gtf": "tests/data/gencode.v29.primary_assembly.annotation_UCSC_names_chr19.gtf.gz",
+  "test_segway_full.bigwigs": [
+    "tests/data/ENCFF685ECA_chr19.bw"
+  ],
+  "test_segway_full.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv",
+  "test_segway_full.max_train_rounds": 5,
+  "test_segway_full.minibatch_fraction": 0.1,
+  "test_segway_full.ncpus": 8,
+  "test_segway_full.num_instances": 2,
+  "test_segway_full.num_labels": 10,
+  "test_segway_full.resolution": 100,
+  "test_segway_full.segtransition_weight_scale": 1
+}
