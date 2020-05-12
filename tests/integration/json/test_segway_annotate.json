@@ -1,0 +1,5 @@
+{
+  "test_segway_annotate.genomedata": "tests/data/files.genomedata",
+  "test_segway_annotate.ncpus": 4,
+  "test_segway_annotate.traindir": "tests/data/traindir.tar.gz"
+}

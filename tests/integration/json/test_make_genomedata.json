@@ -1,0 +1,6 @@
+{
+  "test_make_genomedata.bigwigs": [
+    "tests/data/ENCFF685ECA_chr19.bw"
+  ],
+  "test_make_genomedata.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv"
+}

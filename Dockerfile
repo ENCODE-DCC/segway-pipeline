@@ -30,6 +30,9 @@ RUN conda install -y -c bioconda segway==3.0 segtools=="${SEGTOOLS_VERSION}" num
     conda install -n segtools-signal-distribution -y -c bioconda segtools=="${SEGTOOLS_VERSION}" && \
     conda clean -afy
 
+# Needed for tests that run with non-root user
+RUN chmod -R a+rwx /opt/conda/envs/segtools-signal-distribution/
+
 # It was a pain to try to get the conda-installed bigWigToBedGraph to work. Instead we
 # add the binary ourselves, and mask the conda installed binary. The conda resolver
 # didn't like me trying to upgrade the ucsc-bigwigtobedgraph to 377, got conflicts.

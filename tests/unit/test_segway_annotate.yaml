@@ -1,0 +1,12 @@
+---
+  - name: test_segway_annotate
+    tags:
+      - unit
+    command: >-
+      tests/caper_run.sh
+      tests/unit/wdl/test_segway_annotate.wdl
+      tests/unit/json/test_segway_annotate.json
+    stdout:
+      contains:
+        - export SEGWAY_NUM_LOCAL_JOBS=4
+        - dummy.txt

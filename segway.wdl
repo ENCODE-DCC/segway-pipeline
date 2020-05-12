@@ -86,7 +86,7 @@ task make_genomedata {
     >>>
 
     output {
-        File genomedata = glob("files.genomedata")[0]
+        File genomedata = "files.genomedata"
         Int num_labels = read_int("num_labels.txt")
         Int num_tracks = length(bigwigs)
     }
@@ -138,9 +138,9 @@ task segway_train {
     >>>
 
     output {
-        File traindir = glob("traindir.tar.gz")[0]
+        File traindir = "traindir.tar.gz"
         # Checks that the model training actually emitted final params, not used
-        File trained_params = glob("traindir/params/params.params")[0]
+        File trained_params = "traindir/params/params.params"
     }
 
     runtime {
@@ -165,18 +165,19 @@ task segway_annotate {
         export OMP_NUM_THREADS=1
         mkdir traindir && tar xf ~{traindir} -C traindir --strip-components 1
         mkdir identifydir
-        SEGWAY_CLUSTER=local segway annotate ~{genomedata} --bed=segway.bed.gz traindir identifydir
+        SEGWAY_CLUSTER=local segway annotate ~{genomedata} --bed=segway.bed traindir identifydir
         find traindir -regextype egrep -regex 'traindir/(auxiliary|params/input.master|params/params.params|segway.str|triangulation)($|/.*)' -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf training_params.tar
         gzip -nc training_params.tar > training_params.tar.gz
+        gzip -nc segway.bed > segway.bed.gz
     >>>
 
     output {
-        File segway_params = glob("training_params.tar.gz")[0]
-        File output_bed = glob("segway.bed.gz")[0]
+        File segway_params = "training_params.tar.gz"
+        File output_bed = "segway.bed.gz"
         Array[File] logs = glob("identifydir/output/e/identify/*")
     }
 
@@ -201,7 +202,12 @@ task segtools {
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
         segtools-aggregation --normalize -o feature_aggregation --mode=gene ~{segway_output_bed} ~{annotation_gtf}
         # TODO: undo temporary env fix once segtools is patched. Use conda run to avoid bashrc wackiness
-        conda run -n segtools-signal-distribution segtools-signal-distribution --transformation arcsinh -o signal_distribution ~{segway_output_bed} ~{genomedata}
+        conda run -n segtools-signal-distribution \
+            segtools-signal-distribution \
+                --transformation arcsinh \
+                -o signal_distribution \
+                ~{segway_output_bed} \
+                ~{genomedata}
     >>>
 
     output {

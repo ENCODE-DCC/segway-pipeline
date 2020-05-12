@@ -1,3 +1,4 @@
+---
 defaults: &defaults
   docker:
     - image: circleci/buildpack-deps:xenial-scm
@@ -8,28 +9,28 @@ machine_defaults: &machine_defaults
     image: ubuntu-1604:201903-01
   working_directory: ~/ENCODE-DCC/segway-pipeline
 
-py36: &py36
+py37: &py37
   docker:
-    - image: circleci/python:3.6.9-stretch
+    - image: circleci/python:3.7.3-stretch
   working_directory: ~/ENCODE-DCC/segway-pipeline
 
 commands:
   run_tox:
-    description: "Install and run tox with a given environment"
+    description: Install and run tox with a given environment
     parameters:
       toxenv:
-        description: "The name of the environment as per tox.ini, e.g. py37 or lint"
+        description: The name of the environment as per tox.ini, e.g. py37 or lint
         type: string
       extra_args:
-        description: "Extra arguments that are consumed only when running pytest"
+        description: Extra arguments that are consumed only when running pytest
         type: string
-        default: ""
+        default: ''
     steps:
       - run: sudo pip install tox
       - run: tox -e << parameters.toxenv >> -- << parameters.extra_args >>
 
   set_environment_variables:
-    description: "Set docker image env vars for builds and WDL test runs"
+    description: Set docker image env vars for builds and WDL test runs
     steps:
       - run:
           command: |
@@ -44,40 +45,62 @@ commands:
             PIPELINE_VERSION=$(python -c "import segway_pipeline;print(segway_pipeline.__version__)")
             echo "export PIPELINE_VERSION=${PIPELINE_VERSION}" >> ${BASH_ENV}
 
+  install_h5diff:
+    description: install h5diff HDF5 tool
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y hdf5-tools
+
+  install_diff_pdf_visually_dependencies:
+    description: install dependencies for diff-pdf-visually Python packages
+    steps:
+      - run:
+          command: |
+            sudo apt-get update && sudo apt-get install -y imagemagick poppler-utils
+
+  install_shellcheck:
+    description: Install shellcheck by downloading the binary, don't want to apt-get update
+    steps:
+      - run: curl -s https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck /usr/local/bin
+
 version: 2.1
 jobs:
   lint:
-    <<: *py36
+    <<: *py37
     steps:
       - checkout
+      - install_shellcheck
       - run_tox:
-          toxenv: "lint"
+          toxenv: lint
 
-  test_py36:
-    <<: *py36
+  test_py37:
+    <<: *py37
     steps:
       - checkout
       - run_tox:
-          toxenv: "py36"
+          toxenv: py37
 
   test_wdl:
     <<: *machine_defaults
     description: Generic testing protocol for wdl tasks
     parameters:
       tag:
-        description: "pytest-workflow tag, e.g. functional, integration, test_align"
+        description: pytest-workflow tag, e.g. functional, integration, test_align
         type: string
       num_parallel_workflows:
-        description: "Max number of tests to execute in parallel"
+        description: Max number of tests to execute in parallel
         type: integer
       resource_class:
-        description: "The machine resource class to run the test with"
+        description: The machine resource class to run the test with
         type: string
         default: medium
     resource_class: << parameters.resource_class >>
     steps:
       - checkout
       - set_environment_variables
+      - install_h5diff
+      - install_diff_pdf_visually_dependencies
       - run:
           name: Run pytest-workflow WDL tests using tox
           command: |
@@ -132,34 +155,33 @@ workflows:
     jobs:
       - build
       - lint
-      - test_py36:
+      - test_py37:
           requires:
             - build
             - lint
-    #   Currently no WDL tests, TODO add back when WDL tests are added.
-    #   - test_wdl:
-    #       name: test_wdl_unit
-    #       tag: "unit"
-    #       num_parallel_workflows: 8
-    #       requires:
-    #         - build
-    #         - lint
-    #   - test_wdl:
-    #       name: test_wdl_integration
-    #       resource_class: large
-    #       tag: "integration"
-    #       num_parallel_workflows: 8
-    #       requires:
-    #         - build
-    #         - lint
-    #   - test_wdl:
-    #       name: test_wdl_functional
-    #       resource_class: xlarge
-    #       tag: "functional"
-    #       num_parallel_workflows: 8
-    #       requires:
-    #         - build
-    #         - lint
+      - test_wdl:
+          name: test_wdl_unit
+          tag: unit
+          num_parallel_workflows: 8
+          requires:
+            - build
+            - lint
+      - test_wdl:
+          name: test_wdl_integration
+          resource_class: large
+          tag: integration
+          num_parallel_workflows: 8
+          requires:
+            - build
+            - lint
+      - test_wdl:
+          name: test_wdl_functional
+          resource_class: large
+          tag: functional
+          num_parallel_workflows: 8
+          requires:
+            - build
+            - lint
       - push_template:
           filters:
             branches:
@@ -168,7 +190,7 @@ workflows:
                 - master
           requires:
             # Currently no WDL tests, TODO add back when WDL tests are added.
-            # - test_wdl_unit
-            # - test_wdl_integration
+            - test_wdl_unit
+            - test_wdl_integration
             # - test_wdl_functional
-            - test_py36
+            - test_py37

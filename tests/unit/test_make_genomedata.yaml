@@ -1,0 +1,18 @@
+---
+  - name: test_make_genomedata
+    tags:
+      - unit
+    command: >-
+      tests/caper_run.sh
+      tests/unit/wdl/test_make_genomedata.wdl
+      tests/unit/json/test_make_genomedata.json
+    stdout:
+      contains:
+      # This is the best we can do since pytest-workflow doesn't support regex for
+      # contains. The file paths in the container nare nondeterministic so we can't add
+      # them here. Ideally we would check that dummy.txt appears twice after --files,
+      # and once after --sizes.
+        - --files
+        - --sizes
+        - dummy.txt
+        - --num-tracks 2

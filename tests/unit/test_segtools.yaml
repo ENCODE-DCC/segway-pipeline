@@ -1,0 +1,12 @@
+---
+  - name: test_segtools
+    tags:
+      - unit
+    command: >-
+      tests/caper_run.sh
+      tests/unit/wdl/test_segtools.wdl
+      tests/unit/json/test_segtools.json
+    stdout:
+      contains:
+        - tar xf
+        - dummy.txt

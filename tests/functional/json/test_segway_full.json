@@ -1,0 +1,14 @@
+{
+  "segway.annotation_gtf": "tests/data/gencode.v29.primary_assembly.annotation_UCSC_names_chr19.gtf.gz",
+  "segway.bigwigs": [
+    "tests/data/ENCFF685ECA_chr19.bw"
+  ],
+  "segway.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv",
+  "segway.max_train_rounds": 5,
+  "segway.minibatch_fraction": 0.1,
+  "segway.num_instances": 2,
+  "segway.num_labels": 10,
+  "segway.num_segway_cpus": 8,
+  "segway.resolution": 100,
+  "segway.segtransition_weight_scale": 1
+}

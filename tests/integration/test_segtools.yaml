@@ -1,0 +1,24 @@
+---
+  - name: test_segtools_integration
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_segtools.wdl
+      tests/integration/json/test_segtools.json
+    files:
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.tab
+        md5sum: bad9d914dbf02def5e15095508a145a4
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.pdf
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.tab
+        md5sum: e1c15936ff0a14d3524b0cd6d160c88b
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.pdf
+      - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.pdf
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.div
+        md5sum: 6bdc458f8fe22e2be265a525a31fefa6
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.splicing.pdf
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.tab
+        md5sum: ebaedfa804b5a15c88851eb5986e8538
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
+      - path: test-output/glob-2f0453ff805b02858906905b93a1b15d/signal_distribution.tab
+        md5sum: a0ff1697f8ae6380761d349d7109aa61

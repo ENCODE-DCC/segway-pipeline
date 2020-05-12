@@ -1,0 +1,6 @@
+{
+  "test_segtools.annotation_gtf": "tests/data/gencode.v29.primary_assembly.annotation_UCSC_names_chr19.gtf.gz",
+  "test_segtools.genomedata": "tests/data/files.genomedata",
+  "test_segtools.segway_output_bed": "tests/data/segway.bed.gz",
+  "test_segtools.segway_params": "tests/data/training_params.tar.gz"
+}
