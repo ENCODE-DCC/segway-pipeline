@@ -40,11 +40,201 @@ class UrlJoiner:
         return urljoin(self.base_url, path)
 
 
+class Client:
+    def __init__(self, keypair_path: Optional[str] = None):
+        self._keypair_path = keypair_path
+        self._keypairs: Optional[Tuple[str, str]] = None
+
+    @property
+    def keypair(self) -> Optional[Tuple[str, str]]:
+        if self._keypairs is None:
+            self._keypairs = self._get_keypair()
+        return self._keypairs
+
+    def _get_keypair(self) -> Optional[Tuple[str, str]]:
+        if self._keypair_path is None:
+            return None
+        with open(self._keypair_path) as f:
+            data = json.load(f)
+        try:
+            submit = data["submit"]
+            key = submit["key"]
+            secret = submit["secret"]
+        except KeyError as e:
+            raise KeyError(
+                'Invalid keypairs file, must take the form of {"submit": {"key": ... , "secret": ...}}'
+            ) from e
+        return key, secret
+
+    def get_json(self, url: str) -> Dict[str, Any]:
+        """
+        A wrapper around httpx get potentially with an auth keypair that always asks for
+        JSON.
+        """
+        response = httpx.get(
+            url, auth=self.keypair, headers={"Accept": "application/json"}
+        )
+        response.raise_for_status()
+        res = response.json()
+        if not isinstance(res, dict):
+            raise TypeError(f"Got a JSON array from url {url}, expected object")
+        return res
+
+    def get_assembly(self, chrom_sizes_url: str) -> str:
+        file = self.get_json(chrom_sizes_url)
+        try:
+            assembly: str = file["assembly"]
+        except KeyError as e:
+            raise ValueError("Chrom sizes file does not have an assembly") from e
+        return assembly
+
+    def get_url_for_file(self, file_url: str) -> str:
+        file_obj = self.get_json(file_url)
+        file_s3_url = self.get_url_from_file_obj(file_obj)
+        return file_s3_url
+
+    @staticmethod
+    def get_url_from_file_obj(portal_file: Dict[str, Any]) -> str:
+        try:
+            url: str = portal_file["cloud_metadata"]["url"]
+        except KeyError as e:
+            raise KeyError(
+                f"Could not identify cloud metadata from portal file {portal_file['@id']}"
+            ) from e
+        return url
+
+
+class ArgHelper:
+    def __init__(self) -> None:
+        self._args: Optional[argparse.Namespace] = None
+
+    @property
+    def args(self) -> argparse.Namespace:
+        if self._args is None:
+            self._args = self.parse_args()
+        return self._args
+
+    def parse_args(self) -> argparse.Namespace:
+        parser = self._get_parser()
+        args = parser.parse_args()
+        self._validate_args(args)
+        return args
+
+    def _get_parser(self) -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "-a",
+            "--accession",
+            required=True,
+            help="Accession of reference epigenome on the ENCODE portal",
+        )
+        parser.add_argument(
+            "--skip-assays",
+            nargs="+",
+            help="Assays that should be skipped when generating input JSONs",
+        )
+        parser.add_argument(
+            "--chip-targets",
+            nargs="+",
+            help="List of ChIP targets to restrict Segway input bigwigs to, e.g. H3K27ac, POL2RA",
+        )
+        parser.add_argument(
+            "-n",
+            "--num-segway-cpus",
+            type=int,
+            help="Number of cpus to use for Segway training and annotation, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-r",
+            "--resolution",
+            type=int,
+            help="Resolution, in base pairs, for Segway training, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-f",
+            "--minibatch-fraction",
+            type=float,
+            help="Fraction of genome to sample for each round of training, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-m",
+            "--max-train-rounds",
+            type=int,
+            help="Maximum number of rounds for Segway training, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-i",
+            "--num-instances",
+            type=int,
+            help="Number of Segway models to train in parallel, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-p",
+            "--prior-strength",
+            type=float,
+            help="Coefficient for segment length prior, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-s",
+            "--segtransition-weight-scale",
+            type=float,
+            help="Coefficient for segment length prior, if not specified will use pipeline defaults",
+        )
+        parser.add_argument(
+            "-g",
+            "--annotation-gtf",
+            required=True,
+            help=(
+                "ENCODE ID corresponding to the GENCODE annotation GTF to use as input for "
+                "the pipeline, e.g. `gencode.v29.primary_assembly.annotation_UCSC_names`"
+            ),
+        )
+        parser.add_argument(
+            "-c",
+            "--chrom-sizes",
+            required=True,
+            help=(
+                "ENCODE ID corresponding to the chrom sizes file to use as input to the "
+                "pipeline, e.g. `GRCh38_EBV.chrom.sizes`"
+            ),
+        )
+        parser.add_argument(
+            "-o", "--outfile", help="Name of file to output the input JSON"
+        )
+        parser.add_argument(
+            "-k",
+            "--keypair",
+            help="Path to JSON file containing portal API keys, only needed for in progress data",
+        )
+        return parser
+
+    @staticmethod
+    def _validate_args(args: argparse.Namespace) -> None:
+        if args.skip_assays is not None:
+            for assay_title in args.skip_assays:
+                valid_assays = list(DATASET_OUTPUT_TYPE.keys())
+                if assay_title not in valid_assays:
+                    raise ValueError(
+                        f"Must specify a valid assay type to skip, options are {valid_assays}"
+                    )
+
+    def get_extra_props(self, chrom_sizes_url: str, annotation_url: str) -> InputJson:
+        args = vars(self.args)
+        extra_props: InputJson = {k: v for k, v in args.items() if v is not None}
+        extra_props.pop("accession")
+        extra_props.pop("outfile", None)
+        extra_props.pop("keypair", None)
+        extra_props.pop("chip_targets", None)
+        extra_props.pop("skip_assays", None)
+        extra_props["chrom_sizes"] = chrom_sizes_url
+        extra_props["annotation_gtf"] = annotation_url
+        return extra_props
+
+
 def main() -> None:
-    parser = get_parser()
-    args = parser.parse_args()
-    validate_args(args)
-    keypair = get_keypair(args.keypair)
+    arg_helper = ArgHelper()
+    args = arg_helper.args
+    client = Client(args.keypair)
     urljoiner = UrlJoiner(PORTAL_URL)
     epigenome_id = (
         "/".join(("reference-epigenomes", args.accession))
@@ -54,51 +244,35 @@ def main() -> None:
     reference_epigenome_url, chrom_sizes_url, annotation_url = map(
         urljoiner.resolve, (epigenome_id, args.chrom_sizes, args.annotation_gtf)
     )
-    reference_epigenome = get_json(reference_epigenome_url, auth=keypair)
-    assembly = get_assembly(chrom_sizes_url)
+    reference_epigenome = client.get_json(reference_epigenome_url)
+    # Original files are not embedded, need to embed them manually.
+    for dataset in reference_epigenome["related_datasets"]:
+        original_files = [
+            client.get_json(urljoiner.resolve(f)) for f in dataset["original_files"]
+        ]
+        dataset["original_files"] = original_files
+    assembly = client.get_assembly(chrom_sizes_url)
     portal_files = get_portal_files(
-        reference_epigenome, assembly, urljoiner, args.skip_assays, args.chip_targets
+        reference_epigenome,
+        assembly,
+        urljoiner,
+        client,
+        args.skip_assays,
+        args.chip_targets,
     )
-    chrom_sizes_s3_url = get_url_for_file(chrom_sizes_url)
-    annotation_s3_url = get_url_for_file(annotation_url)
-    extra_props = get_extra_props_from_args(
-        vars(args), chrom_sizes_s3_url, annotation_s3_url
-    )
+    chrom_sizes_s3_url = client.get_url_for_file(chrom_sizes_url)
+    annotation_s3_url = client.get_url_for_file(annotation_url)
+    extra_props = arg_helper.get_extra_props(chrom_sizes_s3_url, annotation_s3_url)
     input_json = make_input_json(portal_files, extra_props)
     outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
     write_json(input_json, outfile)
-
-
-def validate_args(args: argparse.Namespace) -> None:
-    if args.skip_assays is not None:
-        for assay_title in args.skip_assays:
-            valid_assays = list(DATASET_OUTPUT_TYPE.keys())
-            if assay_title not in valid_assays:
-                raise ValueError(
-                    f"Must specify a valid assay type to skip, options are {valid_assays}"
-                )
-
-
-def get_keypair(keypair_path: Optional[str]) -> Optional[Tuple[str, str]]:
-    if keypair_path is None:
-        return None
-    with open(keypair_path) as f:
-        data = json.load(f)
-    try:
-        submit = data["submit"]
-        key = submit["key"]
-        secret = submit["secret"]
-    except KeyError as e:
-        raise KeyError(
-            'Invalid keypairs file, must take the form of {"submit": {"key": ... , "secret": ...}}'
-        ) from e
-    return key, secret
 
 
 def get_portal_files(
     reference_epigenome: Dict[str, Any],
     assembly: str,
     urljoiner: UrlJoiner,
+    client: Client,
     skip_assays: Optional[List[str]] = None,
     chip_targets: Optional[List[str]] = None,
 ) -> List[str]:
@@ -123,21 +297,24 @@ def get_portal_files(
             for i in filter_by_status(dataset["replicates"])
         )
         num_bioreps = len(bioreps)
-        files = filter_by_status(dataset["files"])
+        files = filter_by_status(dataset["original_files"])
+        max_num_reps_in_files = max(len(i["biological_replicates"]) for i in files)
         is_replicated_dnase = assay_title == "DNase-seq" and num_bioreps > 1
         if is_replicated_dnase:
-            preferred_replicate = get_dnase_preferred_replicate(files, urljoiner)
+            preferred_replicate = get_dnase_preferred_replicate(
+                files, urljoiner, client
+            )
         for file in files:
             if file["file_format"] != "bigWig" or file["assembly"] != assembly:
                 continue
             if is_replicated_dnase:
                 if sorted(file["biological_replicates"]) != sorted(preferred_replicate):
                     continue
-            elif len(file["biological_replicates"]) < num_bioreps:
+            elif len(file["biological_replicates"]) < max_num_reps_in_files:
                 continue
             if file["output_type"] == DATASET_OUTPUT_TYPE[assay_title]:
                 if at_id not in datasets_files:
-                    datasets_files[at_id] = get_url_from_file_obj(file)
+                    datasets_files[at_id] = client.get_url_from_file_obj(file)
                 else:
                     raise ValueError(
                         (
@@ -155,65 +332,11 @@ def get_portal_files(
     return list(datasets_files.values())
 
 
-def get_extra_props_from_args(
-    args: Dict[str, Union[float, int, None, str]],
-    chrom_sizes_url: str,
-    annotation_url: str,
-) -> InputJson:
-    extra_props: InputJson = {k: v for k, v in args.items() if v is not None}
-    extra_props.pop("accession")
-    extra_props.pop("outfile", None)
-    extra_props.pop("keypair", None)
-    extra_props.pop("chip_targets", None)
-    extra_props.pop("skip_assays", None)
-    extra_props["chrom_sizes"] = chrom_sizes_url
-    extra_props["annotation_gtf"] = annotation_url
-    return extra_props
-
-
-def get_assembly(chrom_sizes_url: str) -> str:
-    file = get_json(chrom_sizes_url)
-    try:
-        assembly: str = file["assembly"]
-    except KeyError as e:
-        raise ValueError("Chrom sizes file does not have an assembly") from e
-    return assembly
-
-
 def make_input_json(portal_files: List[str], extra_props: InputJson) -> InputJson:
     input_json: InputJson = {}
     input_json[f"{WORKFLOW_NAME}.bigwigs"] = portal_files
     input_json.update({f"{WORKFLOW_NAME}.{k}": v for k, v in extra_props.items()})
     return input_json
-
-
-def get_json(url: str, auth: Optional[Tuple[str, str]] = None) -> Dict[str, Any]:
-    """
-    A wrapper around httpx get potentially with an auth keypair that always asks for
-    JSON.
-    """
-    response = httpx.get(url, auth=auth, headers={"Accept": "application/json"})
-    response.raise_for_status()
-    res = response.json()
-    if not isinstance(res, dict):
-        raise TypeError(f"Got a JSON array from url {url}, expected object")
-    return res
-
-
-def get_url_from_file_obj(portal_file: Dict[str, Any]) -> str:
-    try:
-        url: str = portal_file["cloud_metadata"]["url"]
-    except KeyError as e:
-        raise KeyError(
-            f"Could not identify cloud metadata from portal file {portal_file['@id']}"
-        ) from e
-    return url
-
-
-def get_url_for_file(file_url: str) -> str:
-    file_obj = get_json(file_url)
-    file_s3_url = get_url_from_file_obj(file_obj)
-    return file_s3_url
 
 
 def filter_by_status(objs: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -225,7 +348,7 @@ def filter_by_status(objs: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def get_dnase_preferred_replicate(
-    files: List[Dict[str, Any]], urljoiner: UrlJoiner
+    files: List[Dict[str, Any]], urljoiner: UrlJoiner, client: Client
 ) -> List[int]:
     bams = [i for i in files if i["output_type"] == "alignments"]
     max_mapped_read_count = -1
@@ -237,7 +360,7 @@ def get_dnase_preferred_replicate(
             raise ValueError(
                 f"Expected one samtools flagstats quality metric for file {bam['@id']}, found {len(samtools_flagstats)}"
             )
-        qc = get_json(urljoiner.resolve(samtools_flagstats[0]))
+        qc = client.get_json(urljoiner.resolve(samtools_flagstats[0]))
         qc_mapped_read_count = qc["mapped"]
         if qc_mapped_read_count > max_mapped_read_count:
             preferred_replicate: List[int] = bam["biological_replicates"]
@@ -248,93 +371,6 @@ def get_dnase_preferred_replicate(
 def write_json(input_json: InputJson, path: str) -> None:
     with open(path, "w") as f:
         f.write(json.dumps(input_json, indent=4))
-
-
-def get_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-a",
-        "--accession",
-        required=True,
-        help="Accession of reference epigenome on the ENCODE portal",
-    )
-    parser.add_argument(
-        "--skip-assays",
-        nargs="+",
-        help="Assays that should be skipped when generating input JSONs",
-    )
-    parser.add_argument(
-        "--chip-targets",
-        nargs="+",
-        help="List of ChIP targets to restrict Segway input bigwigs to, e.g. H3K27ac, POL2RA",
-    )
-    parser.add_argument(
-        "-n",
-        "--num-segway-cpus",
-        type=int,
-        help="Number of cpus to use for Segway training and annotation, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-r",
-        "--resolution",
-        type=int,
-        help="Resolution, in base pairs, for Segway training, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-f",
-        "--minibatch-fraction",
-        type=float,
-        help="Fraction of genome to sample for each round of training, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-m",
-        "--max-train-rounds",
-        type=int,
-        help="Maximum number of rounds for Segway training, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-i",
-        "--num-instances",
-        type=int,
-        help="Number of Segway models to train in parallel, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-p",
-        "--prior-strength",
-        type=float,
-        help="Coefficient for segment length prior, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-s",
-        "--segtransition-weight-scale",
-        type=float,
-        help="Coefficient for segment length prior, if not specified will use pipeline defaults",
-    )
-    parser.add_argument(
-        "-g",
-        "--annotation-gtf",
-        required=True,
-        help=(
-            "ENCODE ID corresponding to the GENCODE annotation GTF to use as input for "
-            "the pipeline, e.g. `gencode.v29.primary_assembly.annotation_UCSC_names`"
-        ),
-    )
-    parser.add_argument(
-        "-c",
-        "--chrom-sizes",
-        required=True,
-        help=(
-            "ENCODE ID corresponding to the chrom sizes file to use as input to the "
-            "pipeline, e.g. `GRCh38_EBV.chrom.sizes`"
-        ),
-    )
-    parser.add_argument("-o", "--outfile", help="Name of file to output the input JSON")
-    parser.add_argument(
-        "-k",
-        "--keypair",
-        help="Path to JSON file containing portal API keys, only needed for in progress data",
-    )
-    return parser
 
 
 if __name__ == "__main__":
