@@ -54,9 +54,16 @@ def test_urljoiner_base_url(urljoiner):
     assert urljoiner.base_is_valid
 
 
-def test_urljoiner_resolve(urljoiner):
-    result = urljoiner.resolve("path")
-    assert result == "https://www.qux.io/path"
+@pytest.mark.parametrize(
+    "path,expected",
+    [
+        ("path", "https://www.qux.io/path"),
+        ("https://www.qux.io/path", "https://www.qux.io/path"),
+    ],
+)
+def test_urljoiner_resolve(urljoiner, path, expected):
+    result = urljoiner.resolve(path)
+    assert result == expected
 
 
 @respx.mock
@@ -91,13 +98,17 @@ def test_main(mocker):
         ]
     }
     original_file = {
-        "@id": "tf_chip_1",
-        "assembly": "GRCh38",
-        "output_type": "fold change over control",
-        "file_format": "bigWig",
-        "biological_replicates": [1],
-        "cloud_metadata": {"url": "https://d.na/tf_chip_1"},
-        "status": "released",
+        "@graph": [
+            {
+                "@id": "tf_chip_1",
+                "assembly": "GRCh38",
+                "output_type": "fold change over control",
+                "file_format": "bigWig",
+                "biological_replicates": [1],
+                "cloud_metadata": {"url": "https://d.na/tf_chip_1"},
+                "status": "released",
+            }
+        ]
     }
     respx.get(
         "https://www.encodeproject.org/sizes",
@@ -115,7 +126,7 @@ def test_main(mocker):
         status_code=200,
     )
     respx.get(
-        "https://www.encodeproject.org/files/tf_chip_1/",
+        "https://www.encodeproject.org/search/?type=File&@id=/files/tf_chip_1/&frame=object",
         content=original_file,
         status_code=200,
     )
@@ -127,10 +138,6 @@ def test_main(mocker):
         "segway.annotation_gtf": "foo",
         "segway.chrom_sizes": "bar",
     }
-    #     '{\n    "segway.bigwigs": [\n        "https://d.na/tf_chip_1"\n    ],\n    "seg'
-    #     'way.minibatch_fraction": 0.1,\n    "segway.max_train_rounds": 5,\n    "segway.'
-    #     'annotation_gtf": "foo",\n    "segway.chrom_sizes": "bar"\n}'
-    # )
 
 
 @pytest.mark.parametrize(
@@ -143,6 +150,14 @@ def test_arg_helper_validate_args(condition, skip_assays):
     args.skip_assays = skip_assays
     with condition:
         ah._validate_args(args)
+
+
+def test_arg_helper_transform_args():
+    ah = ArgHelper()
+    args = argparse.Namespace()
+    args.accession = "foo"
+    result = ah._transform_args(args)
+    assert result.accession == "reference-epigenomes/foo"
 
 
 def test_arg_helper_get_extra_props_from_args():
@@ -393,7 +408,7 @@ def test_arg_helper_get_parser(args: List[str], condition):
 def test_get_portal_files(
     urljoiner, condition, reference_epigenome, assembly, expected
 ):
-    client = Client()
+    client = Client(base_url=urljoiner.base_url)
     respx.get(
         urljoiner.resolve("/samtools-flagstats-quality-metrics/1/"),
         content={"mapped": 10},
@@ -405,11 +420,11 @@ def test_get_portal_files(
         status_code=200,
     )
     with condition:
-        result = get_portal_files(reference_epigenome, assembly, urljoiner, client)
+        result = get_portal_files(reference_epigenome, assembly, client)
         assert sorted(result) == sorted(expected)
 
 
-def test_get_portal_files_chip_targets(urljoiner, assembly):
+def test_get_portal_files_chip_targets(assembly):
     client = Client()
     reference_epigenome = {
         "related_datasets": [
@@ -473,16 +488,12 @@ def test_get_portal_files_chip_targets(urljoiner, assembly):
         ]
     }
     result = get_portal_files(
-        reference_epigenome,
-        assembly,
-        urljoiner,
-        client,
-        chip_targets=["H3K27ac", "EP300"],
+        reference_epigenome, assembly, client, chip_targets=["H3K27ac", "EP300"]
     )
     assert sorted(result) == sorted(["https://file.1", "https://file.2"])
 
 
-def test_get_portal_files_missing_chip_target_raises(urljoiner, assembly):
+def test_get_portal_files_missing_chip_target_raises(assembly):
     client = Client()
     reference_epigenome = {
         "related_datasets": [
@@ -508,12 +519,10 @@ def test_get_portal_files_missing_chip_target_raises(urljoiner, assembly):
         ]
     }
     with pytest.raises(ValueError):
-        get_portal_files(
-            reference_epigenome, assembly, urljoiner, client, chip_targets=["foo"]
-        )
+        get_portal_files(reference_epigenome, assembly, client, chip_targets=["foo"])
 
 
-def test_get_portal_files_skip_assays(urljoiner, assembly):
+def test_get_portal_files_skip_assays(assembly):
     client = Client()
     reference_epigenome = {
         "related_datasets": [
@@ -558,7 +567,7 @@ def test_get_portal_files_skip_assays(urljoiner, assembly):
         ]
     }
     result = get_portal_files(
-        reference_epigenome, assembly, urljoiner, client, skip_assays=["TF ChIP-seq"]
+        reference_epigenome, assembly, client, skip_assays=["TF ChIP-seq"]
     )
     assert result == ["https://file.1"]
 
@@ -577,7 +586,7 @@ def test_get_portal_files_skip_assays(urljoiner, assembly):
     ],
 )
 def test_client_get_keypair(mocker, condition, path, read_data, expected):
-    client = Client(path)
+    client = Client(keypair_path=path)
     mocker.patch("builtins.open", mocker.mock_open(read_data=read_data))
     with condition:
         result = client.keypair
@@ -617,6 +626,46 @@ def test_client_get_json(condition, status_code, content):
         respx.get(url, content=content, status_code=status_code)
         data = client.get_json(url)
         assert data == content
+
+
+def test_client_make_query_path():
+    client = Client()
+    query = [("foo", "bar"), ("baz", "qux")]
+    result = client._make_query_path(query)
+    assert result == "search/?foo=bar&baz=qux"
+
+
+@respx.mock
+def test_client_search(urljoiner):
+    client = Client(base_url=urljoiner.base_url)
+    query = [("foo", "bar")]
+    respx.get(
+        urljoiner.resolve("search/?foo=bar"),
+        content={"@graph": [{"foo": "bar"}]},
+        status_code=200,
+    )
+    result = client.search(query)
+    assert result == [{"foo": "bar"}]
+
+
+@respx.mock
+def test_client_get_reference_epigenome(urljoiner):
+    client = Client(base_url=urljoiner.base_url)
+    reference_epigenome = {"related_datasets": [{"original_files": ["/foo/bar"]}]}
+    reference_epigenome_path = "reference-epigenomes/baz"
+    file_search = {"@graph": [{"foo": "bar"}]}
+    respx.get(
+        urljoiner.resolve(reference_epigenome_path),
+        content=reference_epigenome,
+        status_code=200,
+    )
+    respx.get(
+        urljoiner.resolve("search/?type=File&@id=/foo/bar&frame=object"),
+        content=file_search,
+        status_code=200,
+    )
+    result = client.get_reference_epigenome(reference_epigenome_path)
+    assert result == {"related_datasets": [{"original_files": [{"foo": "bar"}]}]}
 
 
 @pytest.mark.parametrize(
@@ -703,7 +752,7 @@ def test_filter_by_status():
 )
 @respx.mock
 def test_get_dnase_preferred_replicate(urljoiner, condition, files, expected):
-    client = Client()
+    client = Client(base_url=urljoiner.base_url)
     respx.get(
         urljoiner.resolve("/samtools-flagstats-quality-metrics/1/"),
         content={"mapped": 10},
@@ -715,7 +764,7 @@ def test_get_dnase_preferred_replicate(urljoiner, condition, files, expected):
         status_code=200,
     )
     with condition:
-        result = get_dnase_preferred_replicate(files, urljoiner, client)
+        result = get_dnase_preferred_replicate(files, client)
         assert result == expected
 
 

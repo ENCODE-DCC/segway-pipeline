@@ -37,11 +37,17 @@ class UrlJoiner:
         return self._base_url
 
     def resolve(self, path: str) -> str:
+        """
+        Resolves paths like foo/bar to base.url/foo/bar
+        """
+        if path.startswith(self.base_url):
+            return path
         return urljoin(self.base_url, path)
 
 
 class Client:
-    def __init__(self, keypair_path: Optional[str] = None):
+    def __init__(self, base_url: str = PORTAL_URL, keypair_path: Optional[str] = None):
+        self.url_joiner = UrlJoiner(base_url)
         self._keypair_path = keypair_path
         self._keypairs: Optional[Tuple[str, str]] = None
 
@@ -66,11 +72,12 @@ class Client:
             ) from e
         return key, secret
 
-    def get_json(self, url: str) -> Dict[str, Any]:
+    def get_json(self, url_or_path: str) -> Dict[str, Any]:
         """
         A wrapper around httpx get potentially with an auth keypair that always asks for
         JSON.
         """
+        url = self.url_joiner.resolve(url_or_path)
         response = httpx.get(
             url, auth=self.keypair, headers={"Accept": "application/json"}
         )
@@ -79,6 +86,34 @@ class Client:
         if not isinstance(res, dict):
             raise TypeError(f"Got a JSON array from url {url}, expected object")
         return res
+
+    def get_reference_epigenome(self, url_or_path: str) -> Dict[str, Any]:
+        """
+        Original files are not embedded in the datasets, need to embed them manually.
+        Batch them using a query to save on individual requests.
+        """
+        reference_epigenome = self.get_json(url_or_path)
+        for dataset in reference_epigenome["related_datasets"]:
+            query_params = [("type", "File")]
+            query_params.extend(("@id", f) for f in dataset["original_files"])
+            query_params.append(("frame", "object"))
+            original_files = self.search(query_params)
+            dataset["original_files"] = original_files
+        return reference_epigenome
+
+    def search(self, query_params: List[Tuple[str, str]]) -> List[Dict[str, Any]]:
+        path = self._make_query_path(query_params)
+        result = self.get_json(path)
+        return result["@graph"]
+
+    def _make_query_path(self, query_params: List[Tuple[str, str]]) -> str:
+        """
+        Generate the query string for the ENCODE portal's `/search` endpoint with the
+        given params.
+        """
+        query_string = "&".join(f"{i}={j}" for i, j in query_params)
+        path = f"search/?{query_string}"
+        return path
 
     def get_assembly(self, chrom_sizes_url: str) -> str:
         file = self.get_json(chrom_sizes_url)
@@ -116,9 +151,41 @@ class ArgHelper:
 
     def parse_args(self) -> argparse.Namespace:
         parser = self._get_parser()
-        args = parser.parse_args()
+        args = self._transform_args(parser.parse_args())
         self._validate_args(args)
         return args
+
+    @staticmethod
+    def _transform_args(args: argparse.Namespace) -> argparse.Namespace:
+        epigenome_id = (
+            "/".join(("reference-epigenomes", args.accession))
+            if not args.accession.startswith("reference-epigenomes")
+            else args.accession
+        )
+        args.accession = epigenome_id
+        return args
+
+    @staticmethod
+    def _validate_args(args: argparse.Namespace) -> None:
+        if args.skip_assays is not None:
+            for assay_title in args.skip_assays:
+                valid_assays = list(DATASET_OUTPUT_TYPE.keys())
+                if assay_title not in valid_assays:
+                    raise ValueError(
+                        f"Must specify a valid assay type to skip, options are {valid_assays}"
+                    )
+
+    def get_extra_props(self, chrom_sizes_url: str, annotation_url: str) -> InputJson:
+        args = vars(self.args)
+        extra_props: InputJson = {k: v for k, v in args.items() if v is not None}
+        extra_props.pop("accession")
+        extra_props.pop("outfile", None)
+        extra_props.pop("keypair", None)
+        extra_props.pop("chip_targets", None)
+        extra_props.pop("skip_assays", None)
+        extra_props["chrom_sizes"] = chrom_sizes_url
+        extra_props["annotation_gtf"] = annotation_url
+        return extra_props
 
     def _get_parser(self) -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser()
@@ -208,60 +275,18 @@ class ArgHelper:
         )
         return parser
 
-    @staticmethod
-    def _validate_args(args: argparse.Namespace) -> None:
-        if args.skip_assays is not None:
-            for assay_title in args.skip_assays:
-                valid_assays = list(DATASET_OUTPUT_TYPE.keys())
-                if assay_title not in valid_assays:
-                    raise ValueError(
-                        f"Must specify a valid assay type to skip, options are {valid_assays}"
-                    )
-
-    def get_extra_props(self, chrom_sizes_url: str, annotation_url: str) -> InputJson:
-        args = vars(self.args)
-        extra_props: InputJson = {k: v for k, v in args.items() if v is not None}
-        extra_props.pop("accession")
-        extra_props.pop("outfile", None)
-        extra_props.pop("keypair", None)
-        extra_props.pop("chip_targets", None)
-        extra_props.pop("skip_assays", None)
-        extra_props["chrom_sizes"] = chrom_sizes_url
-        extra_props["annotation_gtf"] = annotation_url
-        return extra_props
-
 
 def main() -> None:
     arg_helper = ArgHelper()
     args = arg_helper.args
-    client = Client(args.keypair)
-    urljoiner = UrlJoiner(PORTAL_URL)
-    epigenome_id = (
-        "/".join(("reference-epigenomes", args.accession))
-        if not args.accession.startswith("reference-epigenomes")
-        else args.accession
-    )
-    reference_epigenome_url, chrom_sizes_url, annotation_url = map(
-        urljoiner.resolve, (epigenome_id, args.chrom_sizes, args.annotation_gtf)
-    )
-    reference_epigenome = client.get_json(reference_epigenome_url)
-    # Original files are not embedded, need to embed them manually.
-    for dataset in reference_epigenome["related_datasets"]:
-        original_files = [
-            client.get_json(urljoiner.resolve(f)) for f in dataset["original_files"]
-        ]
-        dataset["original_files"] = original_files
-    assembly = client.get_assembly(chrom_sizes_url)
+    client = Client(keypair_path=args.keypair)
+    reference_epigenome = client.get_reference_epigenome(args.accession)
+    assembly = client.get_assembly(args.chrom_sizes)
     portal_files = get_portal_files(
-        reference_epigenome,
-        assembly,
-        urljoiner,
-        client,
-        args.skip_assays,
-        args.chip_targets,
+        reference_epigenome, assembly, client, args.skip_assays, args.chip_targets
     )
-    chrom_sizes_s3_url = client.get_url_for_file(chrom_sizes_url)
-    annotation_s3_url = client.get_url_for_file(annotation_url)
+    chrom_sizes_s3_url = client.get_url_for_file(args.chrom_sizes)
+    annotation_s3_url = client.get_url_for_file(args.annotation_gtf)
     extra_props = arg_helper.get_extra_props(chrom_sizes_s3_url, annotation_s3_url)
     input_json = make_input_json(portal_files, extra_props)
     outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
@@ -271,7 +296,6 @@ def main() -> None:
 def get_portal_files(
     reference_epigenome: Dict[str, Any],
     assembly: str,
-    urljoiner: UrlJoiner,
     client: Client,
     skip_assays: Optional[List[str]] = None,
     chip_targets: Optional[List[str]] = None,
@@ -301,9 +325,7 @@ def get_portal_files(
         max_num_reps_in_files = max(len(i["biological_replicates"]) for i in files)
         is_replicated_dnase = assay_title == "DNase-seq" and num_bioreps > 1
         if is_replicated_dnase:
-            preferred_replicate = get_dnase_preferred_replicate(
-                files, urljoiner, client
-            )
+            preferred_replicate = get_dnase_preferred_replicate(files, client)
         for file in files:
             if file["file_format"] != "bigWig" or file["assembly"] != assembly:
                 continue
@@ -348,7 +370,7 @@ def filter_by_status(objs: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def get_dnase_preferred_replicate(
-    files: List[Dict[str, Any]], urljoiner: UrlJoiner, client: Client
+    files: List[Dict[str, Any]], client: Client
 ) -> List[int]:
     bams = [i for i in files if i["output_type"] == "alignments"]
     max_mapped_read_count = -1
@@ -360,7 +382,7 @@ def get_dnase_preferred_replicate(
             raise ValueError(
                 f"Expected one samtools flagstats quality metric for file {bam['@id']}, found {len(samtools_flagstats)}"
             )
-        qc = client.get_json(urljoiner.resolve(samtools_flagstats[0]))
+        qc = client.get_json(samtools_flagstats[0])
         qc_mapped_read_count = qc["mapped"]
         if qc_mapped_read_count > max_mapped_read_count:
             preferred_replicate: List[int] = bam["biological_replicates"]
