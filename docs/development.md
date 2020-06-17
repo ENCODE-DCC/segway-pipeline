@@ -20,7 +20,7 @@ $ tox -e py37
 
 ### Running WDL tests
 
-Make sure to set the environment variable `SEGWAY_DOCKER_IMAGE_TAG` to point to the pipeline's docker image. Usually `quay.io/encode-dcc/segway-pipeline:template` will suffice, if your code changes require rebuilding then you will need to set this to point to the newly tagged image.
+Make sure to set the environment variable `SEGWAY_DOCKER_IMAGE_TAG` to point to the pipeline's docker image. Usually `encodedcc/segway-pipeline:template` will suffice, if your code changes require rebuilding then you will need to set this to point to the newly tagged image.
 
 To run a WDL test with a specific tag:
 

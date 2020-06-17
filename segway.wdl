@@ -1,7 +1,7 @@
 version 1.0
 
-#CAPER docker quay.io/encode-dcc/segway-pipeline:0.1.0
-#CAPER singularity docker://quay.io/encode-dcc/segway-pipeline:0.1.0
+#CAPER docker encodedcc/segway-pipeline:0.1.0
+#CAPER singularity docker://encodedcc/segway-pipeline:0.1.0
 
 workflow segway {
     input {
