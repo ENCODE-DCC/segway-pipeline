@@ -8,4 +8,3 @@
       tests/integration/json/test_make_bed_to_bigbed.json
     files:
       - path: test-output/segway.bb
-
