@@ -67,7 +67,7 @@ workflow segway {
     File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
 
     if (has_segway_output_bed) {
-        call bed_to_bigbed { input: 
+        call bed_to_bigbed { input:
             segway_output_bed = segway_output_bed_,
             chrom_sizes = select_all([chrom_sizes])[0],
         }

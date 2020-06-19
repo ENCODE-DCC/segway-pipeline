@@ -8,7 +8,7 @@ workflow test_make_bed_to_bigbed    {
         File chrom_sizes
     }
 
-    call segway.make_bed_to_bigbed { input: 
+    call segway.make_bed_to_bigbed { input:
         output_bed = output_bed,
         chrom_sizes = chrom_sizes,
     }
