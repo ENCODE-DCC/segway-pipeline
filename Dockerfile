@@ -26,7 +26,7 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
 
 RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377.git  && \
     chmod +x kentUtils_bin_v377/bin/bedToBigBed && \
-    mv kentUtils_bin_v377/bin/bedToBigBed /utils && \
+    mv kentUtils_bin_v377/bin/bedToBigBed /usr/local/bin/ && \
     rm -rf kentUtils_bin_v377
 
 # segtools-signal-distribution spuriously fails with Python 3, see
