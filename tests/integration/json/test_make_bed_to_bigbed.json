@@ -1,4 +1,4 @@
 {
-    "test_make_bed_to_bigbed.segway_output_bed_": "tests/data/segway.bed.gz",
-    "test_make_bed_to_bigbed.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv"
+  "test_make_bed_to_bigbed.segway_output_bed": "tests/data/segway.bed.gz",
+  "test_make_bed_to_bigbed.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv"
 }
