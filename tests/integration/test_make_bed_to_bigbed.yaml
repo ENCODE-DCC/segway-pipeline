@@ -1,0 +1,11 @@
+---
+  - name: make_bed_to_bigbed_integration
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_make_bed_to_bigbed.wdl
+      tests/integration/json/test_make_bed_to_bigbed.json
+    files:
+      - path: test-output/segway.bb
+

@@ -66,6 +66,14 @@ workflow segway {
     File segway_output_bed_ = select_first([segway_output_bed, segway_annotate.output_bed])
     File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
 
+    if (has_segway_output_bed) {
+        call bed_to_bigbed { input: 
+            segway_output_bed_ = segway_output_bed_,
+            chrom_sizes = select_all([chrom_sizes])[0],
+        }
+    }
+
+
     call segtools { input:
         genomedata = select_first([genomedata, make_genomedata.genomedata]),
         segway_output_bed = segway_output_bed_,
@@ -187,6 +195,30 @@ task segway_annotate {
         disks: "local-disk 1000 SSD"
     }
 }
+
+task bed_to_bigbed {
+    input {
+        File output_bed
+        File chrom_sizes
+    }
+
+    command <<<
+        gunzip {output_bed}
+        bedToBigBed {output_bed} {chrom_sizes} segway.bb
+    >>>
+
+    output {
+        File output_big_bed = "segway.bb"
+    }
+
+    runtime {
+        cpu: 1
+        memory: "8 GB"
+        disks: "local-disk 50 SSD"
+    }
+
+}
+
 
 task segtools {
     input {

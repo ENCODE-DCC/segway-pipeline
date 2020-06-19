@@ -23,6 +23,11 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
+RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377.git  && \
+    chmod +x kentUtils_bin_v377/bin/bedToBigBed && \
+    mv kentUtils_bin_v377/bin/bedToBigBed /utils && \
+    rm -rf kentUtils_bin_v377
+
 # segtools-signal-distribution spuriously fails with Python 3, see
 # https://bitbucket.org/hoffmanlab/segtools/issues/58/segtools-signal-distribution-fails-with
 RUN conda install -y -c bioconda segway==3.0 segtools=="${SEGTOOLS_VERSION}" numpy==1.16.4 && \
