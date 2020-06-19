@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     bzip2 \
     libkrb5-dev \
     wget \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh	 -O ~/miniconda.sh && \
