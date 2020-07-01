@@ -1,5 +1,5 @@
 ---
-  - name: make_bed_to_bigbed_integration
+  - name: test_make_bed_to_bigbed_integration
     tags:
       - integration
     command: >-
