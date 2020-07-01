@@ -66,6 +66,8 @@ workflow segway {
     File segway_output_bed_ = select_first([segway_output_bed, segway_annotate.output_bed])
     File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
 
+    Boolean has_segway_output_bed = defined(segway_output_bed)
+
     if (has_segway_output_bed) {
         call bed_to_bigbed { input:
             segway_output_bed = segway_output_bed_,
@@ -203,8 +205,9 @@ task bed_to_bigbed {
     }
 
     command <<<
-        gunzip {output_bed}
-        bedToBigBed {output_bed} {chrom_sizes} segway.bb
+        echo ("debug - In task bed_to_bigbed")
+        gunzip {segway_output_bed}
+        bedToBigBed {segway_output_bed} {chrom_sizes} segway.bb
     >>>
 
     output {
