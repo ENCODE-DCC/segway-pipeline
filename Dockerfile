@@ -13,6 +13,7 @@ ENV SEGTOOLS_VERSION="1.2.4"
 RUN apt-get update && apt-get install -y \
     bzip2 \
     libkrb5-dev \
+    libssl-dev \
     wget \
     git \
     && rm -rf /var/lib/apt/lists/*
