@@ -37,8 +37,10 @@ RUN conda install -y -c bioconda segway==3.0 segtools=="${SEGTOOLS_VERSION}" num
     conda install -n segtools-signal-distribution -y -c bioconda segtools=="${SEGTOOLS_VERSION}" && \
     conda clean -afy
 
-RUN wget -q https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed      -O bedToBigBed  && \
-    mv bedToBigBed /usr/local/bin/
+RUN wget -q https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed -O bedToBigBed  && \
+    chmod +x /utils/bedToBigBed && \
+    cp /utils/bedToBigBed /usr/local/bin/bedToBigBed && \
+    cp /utils/bedToBigBed /opt/conda/bin/bedToBigBed 
 
 # Needed for tests that run with non-root user
 RUN chmod -R a+rwx /opt/conda/envs/segtools-signal-distribution/
