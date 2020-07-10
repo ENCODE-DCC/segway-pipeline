@@ -205,10 +205,10 @@ task bed_to_bigbed {
     }
 
     command <<<
-        echo ("debug - In task bed_to_bigbed")
+        # echo ("debug - In task bed_to_bigbed")
         # gunzip {segway_output_bed}
-        gzip -dc ${segway_output_bed} > segway.bed
-        bedToBigBed {segway_output_bed} ${chrom_sizes} segway.bb
+        gzip -dc ~{segway_output_bed} > segway.bed
+        bedToBigBed segway.bed ~{chrom_sizes} segway.bb
     >>>
 
     output {
