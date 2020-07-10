@@ -7,4 +7,4 @@
       tests/integration/wdl/test_make_bed_to_bigbed.wdl
       tests/integration/json/test_make_bed_to_bigbed.json
     files:
-      - path: test-output/segway.bb
+      - path: tests/data/segway.bb
