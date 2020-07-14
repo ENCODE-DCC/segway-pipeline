@@ -205,20 +205,12 @@ task bed_to_bigbed {
     }
 
     command <<<
-        # echo ("debug - In task bed_to_bigbed")
-        # gunzip {segway_output_bed}
         gzip -dc ~{segway_output_bed} > segway.bed
         bedToBigBed segway.bed ~{chrom_sizes} segway.bb
     >>>
 
     output {
         File output_big_bed = "segway.bb"
-    }
-
-    runtime {
-        cpu: 1
-        memory: "8 GB"
-        disks: "local-disk 50 SSD"
     }
 
 }
