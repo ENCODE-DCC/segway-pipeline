@@ -206,10 +206,8 @@ task bed_to_bigbed {
 
     command <<<
         gzip -dc ~{segway_output_bed} > segway.bed
-        echo "`ls -l segway.bed`"
-        echo "before bedTobigBed execution"
-        echo "`pwd`"
         bedToBigBed segway.bed ~{chrom_sizes} segway.bb
+        echo "`ls -l segway.bb`"
     >>>
 
     output {
