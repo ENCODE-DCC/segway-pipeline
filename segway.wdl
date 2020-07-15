@@ -205,11 +205,12 @@ task bed_to_bigbed {
     }
 
     command <<<
+        set -euo pipefail
         gzip -dc ~{segway_output_bed} > segway.bed
         bedToBigBed segway.bed ~{chrom_sizes} segway.bb
 
         # without this sleep command, bedToBigBed command in above line fails.
-        sleep 2
+        # sleep 2
 
     >>>
 
