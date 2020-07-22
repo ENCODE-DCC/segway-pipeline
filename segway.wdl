@@ -206,7 +206,7 @@ task bed_to_bigbed {
 
     command <<<
         set -euo pipefail
-        gzip -dc ~{segway_output_bed}| tail +2 > segway.bed
+        gzip -dc ~{segway_output_bed}| tail -n +2 > segway.bed
         bedToBigBed segway.bed ~{chrom_sizes} segway.bb
 
     >>>
