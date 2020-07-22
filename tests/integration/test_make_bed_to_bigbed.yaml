@@ -8,4 +8,3 @@
       tests/integration/json/test_make_bed_to_bigbed.json
     files:
       - path: test-output/segway.bb
-        md5sum: 5a556495c55f60120d5047a6bbe9fe05
