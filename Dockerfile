@@ -13,9 +13,7 @@ ENV SEGTOOLS_VERSION="1.2.4"
 RUN apt-get update && apt-get install -y \
     bzip2 \
     libkrb5-dev \
-    libssl-dev \
     wget \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh	 -O ~/miniconda.sh && \
@@ -24,11 +22,6 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
-
-RUN git clone https://github.com/ENCODE-DCC/kentUtils_bin_v377.git  && \
-    chmod +x kentUtils_bin_v377/bin/bedToBigBed && \
-    mv kentUtils_bin_v377/bin/bedToBigBed /usr/local/bin/ && \
-    rm -rf kentUtils_bin_v377
 
 # segtools-signal-distribution spuriously fails with Python 3, see
 # https://bitbucket.org/hoffmanlab/segtools/issues/58/segtools-signal-distribution-fails-with
