@@ -70,7 +70,7 @@ workflow segway {
     if (has_segway_output_bed && defined(chrom_sizes)) {
         call bed_to_bigbed { input:
             segway_output_bed = segway_output_bed_,
-            chrom_sizes = select_first([chrom_sizes])[0],
+            chrom_sizes = select_all([chrom_sizes])[0],
         }
     }
 
