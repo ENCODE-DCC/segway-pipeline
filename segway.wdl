@@ -212,7 +212,6 @@ task bed_to_bigbed {
     }
 }
 
-
 task segtools {
     input {
         File genomedata
