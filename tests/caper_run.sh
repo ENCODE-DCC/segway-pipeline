@@ -23,3 +23,4 @@ INPUT=$2
 echo "Running caper with WDL ${WDL}, input ${INPUT}, and image ${SEGWAY_DOCKER_IMAGE_TAG}"
 
 caper run "${WDL}" -i "${INPUT}" --docker "${SEGWAY_DOCKER_IMAGE_TAG}" -o ./tests/pytest_workflow_options.json
+cat cromwell.out
