@@ -21,6 +21,9 @@ workflow segway {
         Float prior_strength = 1
         Float? segtransition_weight_scale
 
+        # Segtools parameters
+        Int segtools_aggregation_flank_bases = 10000
+
         # Optional inputs for starting the pipeline not from the beginning
         File? genomedata
         Int? num_labels
@@ -71,6 +74,7 @@ workflow segway {
         segway_output_bed = segway_output_bed_,
         annotation_gtf = annotation_gtf,
         segway_params = segway_params_,
+        flank_bases = segtools_aggregation_flank_bases,
     }
 }
 
@@ -194,13 +198,20 @@ task segtools {
         File segway_output_bed
         File annotation_gtf
         File segway_params
+        Int? flank_bases = 500
     }
 
     command <<<
         mkdir segway_params && tar xf ~{segway_params} -C segway_params --strip-components 1
         segtools-length-distribution -o length_distribution ~{segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
-        segtools-aggregation --normalize -o feature_aggregation --mode=gene ~{segway_output_bed} ~{annotation_gtf}
+        segtools-aggregation \
+            --normalize \
+            -o feature_aggregation \
+            --mode=gene \
+            --flank-bases=~{flank_bases}
+            ~{segway_output_bed} \
+            ~{annotation_gtf}
         # TODO: undo temporary env fix once segtools is patched. Use conda run to avoid bashrc wackiness
         conda run -n segtools-signal-distribution \
             segtools-signal-distribution \
