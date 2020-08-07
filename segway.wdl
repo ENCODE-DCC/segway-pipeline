@@ -209,7 +209,7 @@ task segtools {
             --normalize \
             -o feature_aggregation \
             --mode=gene \
-            --flank-bases=~{flank_bases}
+            --flank-bases=~{flank_bases} \
             ~{segway_output_bed} \
             ~{annotation_gtf}
         # TODO: undo temporary env fix once segtools is patched. Use conda run to avoid bashrc wackiness
