@@ -10,5 +10,6 @@
   "segway.num_labels": 10,
   "segway.num_segway_cpus": 8,
   "segway.resolution": 100,
+  "segway.segtools_aggregation_flank_bases": 500,
   "segway.segtransition_weight_scale": 1
 }
