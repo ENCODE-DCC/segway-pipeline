@@ -10,3 +10,4 @@
       contains:
         - tar xf
         - dummy.txt
+        - --flank-bases=500

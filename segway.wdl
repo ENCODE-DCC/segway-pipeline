@@ -222,7 +222,7 @@ task segtools {
         File segway_output_bed
         File annotation_gtf
         File segway_params
-        Int? flank_bases = 500
+        Int flank_bases
     }
 
     command <<<
@@ -249,7 +249,9 @@ task segtools {
         Array[File] length_distribution_info = glob("length_distribution/*")
         Array[File] gmtk_info = glob("gmtk_parameters/*")
         Array[File] feature_aggregation_info = glob("feature_aggregation/*")
+        File feature_aggregation_tab = "feature_aggregation/feature_aggregation.tab"
         Array[File] signal_distribution_info = glob("signal_distribution/*")
+        File signal_distribution_tab = "signal_distribution/signal_distribution.tab"
     }
 
     runtime {

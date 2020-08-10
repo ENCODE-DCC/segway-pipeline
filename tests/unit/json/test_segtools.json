@@ -1,5 +1,6 @@
 {
   "test_segtools.annotation_gtf": "tests/data/dummy.txt",
+  "test_segtools.flank_bases": 500,
   "test_segtools.genomedata": "tests/data/dummy.txt",
   "test_segtools.segway_output_bed": "tests/data/dummy.txt",
   "test_segtools.segway_params": "tests/data/dummy.txt"

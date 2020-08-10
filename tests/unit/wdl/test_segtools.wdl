@@ -8,6 +8,7 @@ workflow test_segtools {
         File segway_output_bed
         File annotation_gtf
         File segway_params
+        Int flank_bases
     }
 
     call segway.segtools { input:
@@ -15,5 +16,6 @@ workflow test_segtools {
         segway_output_bed = segway_output_bed,
         annotation_gtf = annotation_gtf,
         segway_params = segway_params,
+        flank_bases = flank_bases,
     }
 }
