@@ -17,8 +17,8 @@
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.div
         md5sum: 6bdc458f8fe22e2be265a525a31fefa6
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.splicing.pdf
-      - path: test-output/feature_aggregation.tab
+      - path: test-output/feature_aggregation/feature_aggregation.tab
         md5sum: ebaedfa804b5a15c88851eb5986e8538
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
-      - path: test-output/signal_distribution.tab
+      - path: test-output/signal_distribution/signal_distribution.tab
         md5sum: a0ff1697f8ae6380761d349d7109aa61
