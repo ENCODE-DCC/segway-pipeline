@@ -94,6 +94,9 @@ task make_genomedata {
     command <<<
         python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} -o files.genomedata
         python "$(which calculate_num_labels.py)" --num-tracks ~{length(bigwigs)} -o num_labels.txt
+        echo "`pwd`"
+        echo "`cat files.genomedata`"
+        echo "`cat num_labels.txt`"
     >>>
 
     output {

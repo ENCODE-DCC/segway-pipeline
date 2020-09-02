@@ -4,8 +4,14 @@ from math import sqrt
 
 def main():
     parser = get_parser()
+    print("The value of parser in calculate_num_labels is: ")
+    print(parser)
     args = parser.parse_args()
+    print("The value of args in calculate_num_labels is: ")
+    print(args)
     num_labels = calculate_num_labels(args.num_tracks)
+    print("The value of num_labels in calculate_num_labels is: ")
+    print(num_labels)
     with open(args.outfile, "w") as f:
         f.write(str(num_labels))
 

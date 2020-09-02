@@ -6,8 +6,14 @@ from typing import List
 
 def main():
     parser = get_parser()
+    print ("Value of Parser is: ")
+    print (parser)
     args = parser.parse_args()
+    print ("Value of Args is: ")
+    print (args)
     command = make_command(args.files, args.sizes, args.outfile)
+    print ("Value of Command is: ")
+    print (command)
     run_command(command)
 
 
