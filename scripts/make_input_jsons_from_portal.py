@@ -282,7 +282,7 @@ def main() -> None:
     client = Client(keypair_path=args.keypair)
     reference_epigenome = client.get_reference_epigenome(args.accession)
     assembly = client.get_assembly(args.chrom_sizes)
-    portal_files = get_portal_files(
+    portal_files, found_targets = get_portal_files(
         reference_epigenome, assembly, client, args.skip_assays, args.chip_targets
     )
     chrom_sizes_s3_url = client.get_url_for_file(args.chrom_sizes)
@@ -357,6 +357,7 @@ def get_portal_files(
 def make_input_json(portal_files: List[str], extra_props: InputJson) -> InputJson:
     input_json: InputJson = {}
     input_json[f"{WORKFLOW_NAME}.bigwigs"] = portal_files
+    input_json[f"{WORKFLOW_NAME}.tracks"] = found_targets
     input_json.update({f"{WORKFLOW_NAME}.{k}": v for k, v in extra_props.items()})
     return input_json
 

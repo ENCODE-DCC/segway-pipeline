@@ -38,6 +38,7 @@ workflow segway {
         call make_genomedata { input:
             bigwigs = select_all([bigwigs])[0],
             chrom_sizes = select_all([chrom_sizes])[0],
+            tracks = select_all([tracks])[0],
         }
     }
 
@@ -89,14 +90,17 @@ task make_genomedata {
     input {
         Array[File] bigwigs
         File chrom_sizes
+        Array[File] tracks
     }
 
     command <<<
-        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} -o files.genomedata
+        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --track-labels ~{sep=" " tracks} --sizes ~{chrom_sizes} -o files.genomedata
+        #python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} -o files.genomedata
         python "$(which calculate_num_labels.py)" --num-tracks ~{length(bigwigs)} -o num_labels.txt
         echo "`pwd`"
-        echo "`cat files.genomedata`"
-        echo "`cat num_labels.txt`"
+        echo "`ls -la  files.genomedata`"
+        echo "`more files.genomedata`"
+        echo "`more num_labels.txt`"
     >>>
 
     output {
