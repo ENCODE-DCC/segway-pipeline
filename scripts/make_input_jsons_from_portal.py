@@ -351,7 +351,7 @@ def get_portal_files(
             raise ValueError(
                 f"Could not find all of the specified ChIP targets in the reference epigenome provided, missing {diff}"
             )
-    return list(datasets_files.values())
+    return list(datasets_files.values()),found_targets
 
 
 def make_input_json(portal_files: List[str], found_targets: List[str], extra_props: InputJson) -> InputJson:
