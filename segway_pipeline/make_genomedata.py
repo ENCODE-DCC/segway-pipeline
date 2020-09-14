@@ -22,7 +22,7 @@ def make_command(files: List[str], track_labels: List[str], chrom_sizes: str, ou
     for file in files:
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
-        command.extend(["-track_labels", {track_labels}])
+        # command.extend(["-track_labels", {track_labels}])
     command.append(outfile)
     return command
 
