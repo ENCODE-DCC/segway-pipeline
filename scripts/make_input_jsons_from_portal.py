@@ -288,7 +288,7 @@ def main() -> None:
     chrom_sizes_s3_url = client.get_url_for_file(args.chrom_sizes)
     annotation_s3_url = client.get_url_for_file(args.annotation_gtf)
     extra_props = arg_helper.get_extra_props(chrom_sizes_s3_url, annotation_s3_url)
-    input_json = make_input_json(portal_files, extra_props)
+    input_json = make_input_json(portal_files, found_targets, extra_props)
     outfile = args.outfile if args.outfile is not None else f"{args.accession}.json"
     write_json(input_json, outfile)
 
