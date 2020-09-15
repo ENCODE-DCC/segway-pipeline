@@ -11,13 +11,13 @@ def main():
     args = parser.parse_args()
     print("Value of Args is: ")
     print(args)
-    command = make_command(args.files, args.track_labels, args.sizes, args.outfile)
+    command = make_command(args.files, args.sizes, args.outfile)
     print("Value of Command is: ")
     print(command)
     run_command(command)
 
 
-def make_command(files: List[str], track_labels: List[str], chrom_sizes: str, outfile: str) -> List[str]:
+def make_command(files: List[str], chrom_sizes: str, outfile: str) -> List[str]:
     command = ["genomedata-load", "-s", chrom_sizes, "--sizes"]
     for file in files:
         file_basename = Path(file).with_suffix("").name
