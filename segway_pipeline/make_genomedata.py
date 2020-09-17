@@ -16,7 +16,7 @@ def make_command(files: List[str], tracks: str, chrom_sizes: str, outfile: str) 
     for file in files:
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
-        command.extend(["-tracks", {tracks}])
+        # command.extend(["-tracks", {tracks}])
     command.append(outfile)
     return command
 
