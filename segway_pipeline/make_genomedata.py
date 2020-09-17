@@ -7,16 +7,16 @@ from typing import List
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    command = make_command(args.files, args.tracks, args.sizes, args.outfile)
+    command = make_command(args.files, args.sizes, args.outfile)
     run_command(command)
 
 
-def make_command(files: List[str], tracks: str, chrom_sizes: str, outfile: str) -> List[str]:
+def make_command(files: List[str], chrom_sizes: str, tracks: List[str], outfile: str) -> List[str]:
     command = ["genomedata-load", "-s", chrom_sizes, "--sizes"]
     for file in files:
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
-        # command.extend(["-tracks", {tracks}])
+        command.extend(["-tracks", {tracks}])
     command.append(outfile)
     return command
 

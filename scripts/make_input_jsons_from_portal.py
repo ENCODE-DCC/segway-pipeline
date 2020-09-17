@@ -361,7 +361,9 @@ def get_portal_files(
 
 def make_input_json(
     # portal_files: List[str], found_targets: List[str], extra_props: InputJson) -> InputJson:
-    portal_files: List[str], extra_props: InputJson) -> InputJson:
+    portal_files: List[str],
+    extra_props: InputJson,
+) -> InputJson:
     input_json: InputJson = {}
     input_json[f"{WORKFLOW_NAME}.bigwigs"] = portal_files
     # input_json[f"{WORKFLOW_NAME}.tracks"] = found_targets

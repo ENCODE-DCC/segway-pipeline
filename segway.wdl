@@ -97,7 +97,7 @@ task make_genomedata {
         # python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} -o files.genomedata
         # echo ~{if defined(tracks) then "--tracks" else ""} ~{sep=" " if defined(tracks) then tracks else[]}
 
-        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} \ 
+        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} \
                ~{if defined(tracks) then "--tracks " + tracks else ""}  \
                -o files.genomedata
 
