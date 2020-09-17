@@ -6,23 +6,17 @@ from typing import List
 
 def main():
     parser = get_parser()
-    print("Value of Parser is: ")
-    print(parser)
     args = parser.parse_args()
-    print("Value of Args is: ")
-    print(args)
-    command = make_command(args.files, args.sizes, args.outfile)
-    print("Value of Command is: ")
-    print(command)
+    command = make_command(args.files, args.tracks, args.sizes, args.outfile)
     run_command(command)
 
 
-def make_command(files: List[str], chrom_sizes: str, outfile: str) -> List[str]:
+def make_command(files: List[str], tracks: str, chrom_sizes: str, outfile: str) -> List[str]:
     command = ["genomedata-load", "-s", chrom_sizes, "--sizes"]
     for file in files:
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
-        # command.extend(["-track_labels", {track_labels}])
+        command.extend(["-tracks", {tracks}])
     command.append(outfile)
     return command
 
