@@ -1,0 +1,19 @@
+{
+    "segway.bigwigs": [
+        "https://encode-public.s3.amazonaws.com/2019/09/07/119b9202-8d06-4bb1-8291-7a79e06a2798/ENCFF785JPM.bigWig",
+        "https://encode-public.s3.amazonaws.com/2019/09/03/d6d27051-f7b8-4185-94e1-0234db06ca54/ENCFF216ATQ.bigWig",
+        "https://encode-public.s3.amazonaws.com/2019/09/07/ca6416fd-7a35-4298-9690-c8a0ce432a11/ENCFF064XFE.bigWig",
+        "https://encode-public.s3.amazonaws.com/2019/09/07/d4133e5a-e112-4f12-b1c2-0b3f4397c14e/ENCFF313PPS.bigWig",
+        "https://encode-public.s3.amazonaws.com/2019/09/07/efe2d00a-4e8b-4f78-8c12-b086630e170d/ENCFF955OWU.bigWig"
+    ],
+    "segway.tracks": [
+        "H3K27me3",
+        "H3K9me3",
+        "H3K36me3",
+        "H3K4me3",
+        "H3K27ac"
+    ],
+    "segway.resolution": 4,
+    "segway.annotation_gtf": "https://encode-public.s3.amazonaws.com/2019/06/04/8f6cba12-2ebe-4bec-a15d-53f498979de0/gencode.v29.primary_assembly.annotation_UCSC_names.gtf.gz",
+    "segway.chrom_sizes": "https://encode-public.s3.amazonaws.com/2016/01/06/89effdbe-9e3f-48c6-9781-81e565ac45a3/GRCh38_EBV.chrom.sizes.tsv"
+}
