@@ -38,6 +38,7 @@ workflow segway {
         call make_genomedata { input:
             bigwigs = select_all([bigwigs])[0],
             chrom_sizes = select_all([chrom_sizes])[0],
+            tracks = select_all([tracks])[0],
         }
     }
 
@@ -89,6 +90,7 @@ task make_genomedata {
     input {
         Array[File] bigwigs
         File chrom_sizes
+        Array[File] tracks
     }
 
     command <<<
