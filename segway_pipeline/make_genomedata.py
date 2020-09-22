@@ -7,7 +7,7 @@ from typing import List
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    command = make_command(args.files, args.sizes, args.outfile)
+    command = make_command(args.files, args.sizes, args.tracks, args.outfile)
     run_command(command)
 
 
@@ -18,7 +18,7 @@ def make_command(
     for file in files:
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
-        command.extend(["-tracks", f"{tracks}"])
+        # command.extend(["-tracks", f"{tracks}"])
     command.append(outfile)
     return command
 
