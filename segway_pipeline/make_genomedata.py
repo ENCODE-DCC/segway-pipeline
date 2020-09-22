@@ -11,12 +11,14 @@ def main():
     run_command(command)
 
 
-def make_command(files: List[str], chrom_sizes: str, tracks: str, outfile: str) -> List[str]:
+def make_command(
+    files: List[str], chrom_sizes: str, tracks: str, outfile: str
+) -> List[str]:
     command = ["genomedata-load", "-s", chrom_sizes, "--sizes"]
     for file in files:
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
-        command.extend(["-tracks", {tracks}])
+        command.extend(["-tracks", f"{tracks}"])
     command.append(outfile)
     return command
 

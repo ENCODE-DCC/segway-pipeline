@@ -303,7 +303,7 @@ def get_portal_files(
     client: Client,
     skip_assays: Optional[List[str]] = None,
     chip_targets: Optional[List[str]] = None,
-) -> List[str], List[str]:
+) -> Tuple[List[str], List[str]]:
     datasets_files: Dict[str, str] = {}
     found_targets: List[str] = []
     for dataset in reference_epigenome["related_datasets"]:
@@ -356,11 +356,11 @@ def get_portal_files(
                 f"Could not find all of the specified ChIP targets in the reference epigenome provided, missing {diff}"
             )
     return list(datasets_files.values()), found_targets
-    # return list(datasets_files.values())
 
 
 def make_input_json(
-    portal_files: List[str], found_targets: List[str], extra_props: InputJson) -> InputJson:
+    portal_files: List[str], found_targets: List[str], extra_props: InputJson
+) -> InputJson:
     # portal_files: List[str], extra_props: InputJson,) -> InputJson:
     input_json: InputJson = {}
     input_json[f"{WORKFLOW_NAME}.bigwigs"] = portal_files
