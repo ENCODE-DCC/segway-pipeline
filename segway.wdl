@@ -101,9 +101,10 @@ task make_genomedata {
         #        ~{if defined(tracks) then "--tracks " +  tracks else ""}  \
         #        -o files.genomedata
         #
-        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} ~{if defined(tracks) then "--tracks " else ""} ~{sep=" " if defined(tracks) then tracks else[]} -o files.genomedata
+        python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} ~{if defined(tracks) then "--tracks" else ""} ~{sep=" " if defined(tracks) then tracks else[]} -o files.genomedata
 
         python "$(which calculate_num_labels.py)" --num-tracks ~{length(bigwigs)} -o num_labels.txt
+        echo ~{tracks}
     >>>
 
     output {

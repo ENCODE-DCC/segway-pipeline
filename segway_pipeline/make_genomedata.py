@@ -19,7 +19,7 @@ def make_command(
         file_basename = Path(file).with_suffix("").name
         command.extend(["-t", f"{file_basename}={file}"])
     for track in tracks:
-        command.extend(["-tracks", f"{tracks}"])
+        command.extend(["-tracks", f"{track}"])
     command.append(outfile)
     return command
 
