@@ -22,6 +22,10 @@ def test_make_command():
         "f1=f1.bigwig",
         "-t",
         "f2=f2.bw",
+        "--tracks",
+        "track2=H3K4me1",
+        "--tracks",
+        "track1=H3K4me3",
         "my.gd",
     ]
 
