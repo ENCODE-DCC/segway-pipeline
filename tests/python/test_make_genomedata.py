@@ -11,7 +11,7 @@ def test_make_command():
     files = ["f1.bigwig", "f2.bw"]
     sizes = "chrom.sizes"
     outfile = "my.gd"
-    result = make_command(files, sizes, outfile)
+    result = make_command(files, sizes, tracks, outfile)
     assert result == [
         "genomedata-load",
         "-s",
