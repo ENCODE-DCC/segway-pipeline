@@ -22,10 +22,10 @@ def test_make_command():
         "f1=f1.bigwig",
         "-t",
         "f2=f2.bw",
-        "--tracks",
-        "track2=H3K4me1",
-        "--tracks",
-        "track1=H3K4me3",
+        "-tracks",
+        "track1=H3K4me1",
+        "-tracks",
+        "track2=H3K4me3",
         "my.gd",
     ]
 
@@ -51,7 +51,17 @@ def test_main(mocker):
     and the second extracts the first positional arg.
     """
     mocker.patch("subprocess.run")
-    testargs = ["prog", "--files", "ref.bw", "--sizes", "chrom.sizes", "-o", "out.file"]
+    testargs = [
+        "prog",
+        "--files",
+        "ref.bw",
+        "--sizes",
+        "chrom.sizes",
+        "-o",
+        "--tracks",
+        "H3K4me1",
+        "out.file",
+    ]
     mocker.patch("sys.argv", testargs)
     main()
     assert subprocess.run.call_args[0] == (
@@ -62,6 +72,8 @@ def test_main(mocker):
             "--sizes",
             "-t",
             "ref=ref.bw",
+            "-tracks",
+            "H3K4me1",
             "out.file",
         ],
     )
