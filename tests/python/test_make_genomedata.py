@@ -10,6 +10,7 @@ from segway_pipeline.make_genomedata import get_parser, main, make_command
 def test_make_command():
     files = ["f1.bigwig", "f2.bw"]
     sizes = "chrom.sizes"
+    tracks = ["H3K4me1", "H3K4me3"]
     outfile = "my.gd"
     result = make_command(files, sizes, tracks, outfile)
     assert result == [
