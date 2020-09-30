@@ -28,17 +28,7 @@ def test_make_command():
 @pytest.mark.parametrize(
     "args,condition",
     [
-        (
-            [
-                "--sizes",
-                "ch.sizes",
-                "--files",
-                "b.bw",
-                "-o",
-                "outfile",
-            ],
-            does_not_raise(),
-        ),
+        (["--sizes", "ch.sizes", "--files", "b.bw", "-o", "outfile"], does_not_raise()),
         (["--sizes", "ch.sizes", "-o", "outfile"], pytest.raises(SystemExit)),
         (["--files", "b.bw", "-o", "outfile"], pytest.raises(SystemExit)),
         (["--sizes", "ch.sizes", "--files", "b.bw"], pytest.raises(SystemExit)),
@@ -56,15 +46,7 @@ def test_main(mocker):
     and the second extracts the first positional arg.
     """
     mocker.patch("subprocess.run")
-    testargs = [
-        "prog",
-        "--files",
-        "ref.bw",
-        "--sizes",
-        "chrom.sizes",
-        "-o",
-        "out.file",
-    ]
+    testargs = ["prog", "--files", "ref.bw", "--sizes", "chrom.sizes", "-o", "out.file"]
     mocker.patch("sys.argv", testargs)
     main()
     assert subprocess.run.call_args[0] == (
