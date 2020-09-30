@@ -10,16 +10,13 @@ from segway_pipeline.make_genomedata import get_parser, main, make_command
 def test_make_command():
     files = ["f1.bigwig", "f2.bw"]
     sizes = "chrom.sizes"
-    tracks = "tracks"
     outfile = "my.gd"
-    result = make_command(files, sizes, tracks, outfile)
+    result = make_command(files, sizes, outfile)
     assert result == [
         "genomedata-load",
         "-s",
         "chrom.sizes",
         "--sizes",
-        "tracks",
-        "--tracks",
         "-t",
         "f1=f1.bigwig",
         "-t",
@@ -35,8 +32,6 @@ def test_make_command():
             [
                 "--sizes",
                 "ch.sizes",
-                "--tracks",
-                "tracks",
                 "--files",
                 "b.bw",
                 "-o",
@@ -67,8 +62,6 @@ def test_main(mocker):
         "ref.bw",
         "--sizes",
         "chrom.sizes",
-        "--tracks",
-        "tracks",
         "-o",
         "out.file",
     ]
@@ -80,8 +73,6 @@ def test_main(mocker):
             "-s",
             "chrom.sizes",
             "--sizes",
-            "tracks",
-            "--tracks",
             "-t",
             "ref=ref.bw",
             "out.file",
