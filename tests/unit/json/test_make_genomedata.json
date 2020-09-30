@@ -5,6 +5,6 @@
   ],
   "test_make_genomedata.chrom_sizes": "tests/data/dummy.txt",
   "test_make_genomedata.tracks": [
-    "tests/data/dummy.txt"
+    "tests/data/print-tracks.txt"
   ]
 }
