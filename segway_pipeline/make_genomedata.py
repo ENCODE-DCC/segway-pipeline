@@ -7,25 +7,25 @@ from typing import List
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    print ("Value of args is : ")
-    print ("-------------------")
-    print ("args")
+    print("Value of args is : ")
+    print("-------------------")
+    print("args")
     command = make_command(args.files, args.sizes, args.tracks, args.outfile)
-    print ("Value of command is : ")
-    print ("-------------------")
-    print ("command")
+    print("Value of command is : ")
+    print("-------------------")
+    print("command")
     run_command(command)
 
 
 def make_command(
     files: List[str], chrom_sizes: str, tracks: str, outfile: str
 ) -> List[str]:
-    print ("Value of files is : ")
-    print ("-------------------")
-    print ("files")
-    print ("Value of tracks is : ")
-    print ("-------------------")
-    print ("tracks")
+    print("Value of files is : ")
+    print("-------------------")
+    print("files")
+    print("Value of tracks is : ")
+    print("-------------------")
+    print("tracks")
     command = ["genomedata-load", "-s", chrom_sizes, "--sizes"]
     for file in files:
         file_basename = Path(file).with_suffix("").name
