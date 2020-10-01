@@ -10,7 +10,7 @@ from segway_pipeline.make_genomedata import get_parser, main, make_command
 def test_make_command():
     files = ["f1.bigwig", "f2.bw"]
     sizes = "chrom.sizes"
-    tracks = ["H3K4me1", "H3K4me3"]
+    tracks = ["track1.H3K4me1", "track2.H3K4me3"]
     outfile = "my.gd"
     result = make_command(files, sizes, tracks, outfile)
     assert result == [
@@ -23,9 +23,9 @@ def test_make_command():
         "-t",
         "f2=f2.bw",
         "-tracks",
-        "track1=H3K4me1",
+        "track1.H3K4me1",
         "-tracks",
-        "track2=H3K4me3",
+        "track2.H3K4me3",
         "my.gd",
     ]
 
@@ -33,7 +33,7 @@ def test_make_command():
 @pytest.mark.parametrize(
     "args,condition",
     [
-        (["--sizes", "ch.sizes", "--files", "b.bw", "-o", "outfile"], does_not_raise()),
+        (["--sizes", "ch.sizes", "--files", "b.bw", "--tracks", "H3K4me3", "-o", "outfile"], does_not_raise()),
         (["--sizes", "ch.sizes", "-o", "outfile"], pytest.raises(SystemExit)),
         (["--files", "b.bw", "-o", "outfile"], pytest.raises(SystemExit)),
         (["--sizes", "ch.sizes", "--files", "b.bw"], pytest.raises(SystemExit)),
@@ -57,9 +57,9 @@ def test_main(mocker):
         "ref.bw",
         "--sizes",
         "chrom.sizes",
-        "-o",
         "--tracks",
         "H3K4me1",
+        "-o",
         "out.file",
     ]
     mocker.patch("sys.argv", testargs)

@@ -18,7 +18,7 @@ def main():
 
 
 def make_command(
-    files: List[str], chrom_sizes: str, tracks: str, outfile: str
+    files: List[str], chrom_sizes: str, tracks: List[str], outfile: str
 ) -> List[str]:
     print("Value of files is : ")
     print("-------------------")
@@ -46,6 +46,9 @@ def get_parser():
         "--files", nargs="+", help="a list of paths to bigwig files", required=True
     )
     parser.add_argument("--sizes", help="path to chrom sizes file", required=True)
+    parser.add_argument(
+        "--tracks", nargs="+", help="a list of tracks", required=True
+    )
     parser.add_argument(
         "-o", "--outfile", help="desired name of output file", required=True
     )

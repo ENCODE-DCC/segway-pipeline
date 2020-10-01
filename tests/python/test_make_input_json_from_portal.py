@@ -420,7 +420,7 @@ def test_get_portal_files(
         status_code=200,
     )
     with condition:
-        result = get_portal_files(reference_epigenome, assembly, client)
+        result, targets = get_portal_files(reference_epigenome, assembly, client)
         assert sorted(result) == sorted(expected)
 
 
@@ -487,7 +487,7 @@ def test_get_portal_files_chip_targets(assembly):
             },
         ]
     }
-    result = get_portal_files(
+    result, targets = get_portal_files(
         reference_epigenome, assembly, client, chip_targets=["H3K27ac", "EP300"]
     )
     assert sorted(result) == sorted(["https://file.1", "https://file.2"])
@@ -566,7 +566,7 @@ def test_get_portal_files_skip_assays(assembly):
             },
         ]
     }
-    result = get_portal_files(
+    result, targets = get_portal_files(
         reference_epigenome, assembly, client, skip_assays=["TF ChIP-seq"]
     )
     assert result == ["https://file.1"]
@@ -685,9 +685,11 @@ def test_client_get_url_from_file_obj(condition, obj, expected):
 def test_make_input_json():
     portal_files = ["http://foo.bar/f1", "http://foo.bar/f2"]
     kwargs = {"prior_strength": 1.5, "num_segway_cpus": 10}
-    result = make_input_json(portal_files, kwargs)
+    tracks = ["H3K4me1", "H3K4me3"]
+    result = make_input_json(portal_files, tracks, kwargs, )
     assert result == {
         "segway.bigwigs": ["http://foo.bar/f1", "http://foo.bar/f2"],
+        "segway.tracks": ["H3K4me1", "H3K4me3"],
         "segway.num_segway_cpus": 10,
         "segway.prior_strength": 1.5,
     }
