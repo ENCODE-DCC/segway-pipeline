@@ -686,7 +686,7 @@ def test_make_input_json():
     portal_files = ["http://foo.bar/f1", "http://foo.bar/f2"]
     kwargs = {"prior_strength": 1.5, "num_segway_cpus": 10}
     tracks = ["H3K4me1", "H3K4me3"]
-    result = make_input_json(portal_files, tracks, kwargs, )
+    result = make_input_json(portal_files, tracks, kwargs)
     assert result == {
         "segway.bigwigs": ["http://foo.bar/f1", "http://foo.bar/f2"],
         "segway.tracks": ["H3K4me1", "H3K4me3"],

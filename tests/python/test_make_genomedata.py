@@ -33,7 +33,19 @@ def test_make_command():
 @pytest.mark.parametrize(
     "args,condition",
     [
-        (["--sizes", "ch.sizes", "--files", "b.bw", "--tracks", "H3K4me3", "-o", "outfile"], does_not_raise()),
+        (
+            [
+                "--sizes",
+                "ch.sizes",
+                "--files",
+                "b.bw",
+                "--tracks",
+                "H3K4me3",
+                "-o",
+                "outfile",
+            ],
+            does_not_raise(),
+        ),
         (["--sizes", "ch.sizes", "-o", "outfile"], pytest.raises(SystemExit)),
         (["--files", "b.bw", "-o", "outfile"], pytest.raises(SystemExit)),
         (["--sizes", "ch.sizes", "--files", "b.bw"], pytest.raises(SystemExit)),

@@ -46,9 +46,7 @@ def get_parser():
         "--files", nargs="+", help="a list of paths to bigwig files", required=True
     )
     parser.add_argument("--sizes", help="path to chrom sizes file", required=True)
-    parser.add_argument(
-        "--tracks", nargs="+", help="a list of tracks", required=True
-    )
+    parser.add_argument("--tracks", nargs="+", help="a list of tracks", required=True)
     parser.add_argument(
         "-o", "--outfile", help="desired name of output file", required=True
     )
