@@ -33,7 +33,7 @@ RUN conda \
         pandas==0.25.3 \
         psutil==5.8.0 \
         segtools=="${SEGTOOLS_VERSION}" \
-        segway==3.0 && \
+        segway==3.0.3 && \
     /opt/conda/bin/pip install scikit-learn==0.22.2.post1 && \
     conda install -c r r-ggplot2==3.1.1 && \
     conda create -y -n segtools-signal-distribution python=2.7 && \

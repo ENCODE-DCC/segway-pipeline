@@ -10,9 +10,11 @@ workflow test_segway_train {
         Int ncpus
         Int num_instances
         Int num_labels
-        Float? prior_strength
+        Float prior_strength
         Int resolution
         Float segtransition_weight_scale
+        Int ruler_scale
+        Float track_weight
     }
 
     call segway.segway_train { input:
@@ -25,5 +27,7 @@ workflow test_segway_train {
         num_instances = num_instances,
         prior_strength = prior_strength,
         segtransition_weight_scale = segtransition_weight_scale,
+        ruler_scale = ruler_scale,
+        track_weight = track_weight,
     }
 }

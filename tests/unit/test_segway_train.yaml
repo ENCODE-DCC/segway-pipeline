@@ -15,6 +15,5 @@
         - --num-instances 3
         - --segtransition-weight-scale 5
         - --max-train-rounds 25
-        - dummy.txt traindir
       must_not_contain:
         - --prior_strength
