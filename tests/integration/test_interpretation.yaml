@@ -1,0 +1,15 @@
+---
+  - name: test_interpretation
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_interpretation.wdl
+      tests/integration/json/test_interpretation.json
+    files:
+      - path: test-output/interpretation-output/classification/sample/mnemonics.txt
+        md5sum: fa9f8056de4d5d5f2a0c2d7dd7d1b34f
+      - path: test-output/interpretation-output/classification/sample/classifier_data.tab
+        md5sum: 5512c350fdd401ff027b72f6ee18f5f4
+      - path: test-output/interpretation-output/classification/sample/probs.txt
+        md5sum: 93547e4f60fa74b3a99e1963716d8290

@@ -12,17 +12,29 @@
       - path: test-output/training_params.tar.gz
       - path: test-output/segway.bed.gz
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.tab
-        md5sum: bad9d914dbf02def5e15095508a145a4
+        md5sum: 4ee47a2262b10d398f0c325ad175a079
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.pdf
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.tab
-        md5sum: e1c15936ff0a14d3524b0cd6d160c88b
+        md5sum: a1522722f5333ab428ac7131cbec3a74
       - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.pdf
       - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.pdf
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.div
         md5sum: 6bdc458f8fe22e2be265a525a31fefa6
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.splicing.pdf
       - path: test-output/feature_aggregation/feature_aggregation.tab
-        md5sum: ebaedfa804b5a15c88851eb5986e8538
+        md5sum: dbf80c3884f563ea905f4fa1d7b098ed
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
       - path: test-output/signal_distribution/signal_distribution.tab
-        md5sum: a0ff1697f8ae6380761d349d7109aa61
+        md5sum: 7c8c03e4c1d7b8c4ed1bbfd307759d23
+      - path: test-output/interpretation-output/classification/sample/mnemonics.txt
+        md5sum: 8a8d3e3a2a4486109fdc35c245e91e5c
+      - path: test-output/interpretation-output/classification/sample/classifier_data.tab
+        md5sum: a754b71b4f91ea7ca835bbd44f2f0d5c
+      - path: test-output/interpretation-output/classification/sample/probs.txt
+        md5sum: bf4537129f23da02d417c1b7f84bc43e
+      - path: test-output/relabeled.bed.gz
+        md5sum: fb3c85fbd962ddac5f00392d8627b4ba
+      - path: test-output/recolored.bed.gz
+        md5sum: b654ef40451a820ecdc2acb1a91a50ec
+      - path: test-output/recolored.bb
+        md5sum: 832bf49ff6c99da5f1359c534848c447

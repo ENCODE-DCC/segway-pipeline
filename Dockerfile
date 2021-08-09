@@ -12,6 +12,7 @@ ENV SEGTOOLS_VERSION="1.2.4"
 # libkrb5-dev needed for bigWigToBedGraph generation during genomedata creation to work
 RUN apt-get update && apt-get install -y \
     bzip2 \
+    git \
     libkrb5-dev \
     wget \
     && rm -rf /var/lib/apt/lists/*
@@ -25,10 +26,34 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64
 
 # segtools-signal-distribution spuriously fails with Python 3, see
 # https://bitbucket.org/hoffmanlab/segtools/issues/58/segtools-signal-distribution-fails-with
-RUN conda install -y -c bioconda segway==3.0 segtools=="${SEGTOOLS_VERSION}" numpy==1.16.4 && \
+RUN conda \
+        install \
+        -y \
+        -c bioconda \
+        pandas==0.25.3 \
+        psutil==5.8.0 \
+        segtools=="${SEGTOOLS_VERSION}" \
+        segway==3.0 && \
+    /opt/conda/bin/pip install scikit-learn==0.22.2.post1 && \
+    conda install -c r r-ggplot2==3.1.1 && \
     conda create -y -n segtools-signal-distribution python=2.7 && \
-    conda install -n segtools-signal-distribution -y -c bioconda segtools=="${SEGTOOLS_VERSION}" && \
+    conda \
+        install \
+        -n segtools-signal-distribution \
+        -y \
+        -c bioconda \
+        rpy2==2.8.6 \
+        segtools=="${SEGTOOLS_VERSION}" && \
     conda clean -afy
+
+WORKDIR /opt
+
+RUN git clone https://github.com/paul-sud/interpretation_samples.git && \
+    chmod a+w interpretation_samples && \
+    cd interpretation_samples && \
+    git checkout 128fb6abe169052e7946dc2e634ba69e73174276 && \
+    rm -rf segwayOutput testworkdir model.pickle.gz && \
+    chmod a+x apply_samples.py
 
 # Needed for tests that run with non-root user
 RUN chmod -R a+rwx /opt/conda/envs/segtools-signal-distribution/
@@ -40,4 +65,4 @@ RUN chmod -R a+rwx /opt/conda/envs/segtools-signal-distribution/
 COPY bin/* /utils/
 COPY segway_pipeline/* /software/
 
-ENV PATH=/utils:/software:$PATH
+ENV PATH=/opt/interpretation_samples:/utils:/software:$PATH

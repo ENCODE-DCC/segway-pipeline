@@ -1,5 +1,5 @@
 ---
-  - name: test_segway_train_integration
+  - name: test_segway_train
     tags:
       - integration
     command: >-

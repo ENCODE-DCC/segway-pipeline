@@ -1,5 +1,5 @@
 ---
-  - name: test_make_genomedata
+  - name: test_make_genomedata_unit
     tags:
       - unit
     command: >-

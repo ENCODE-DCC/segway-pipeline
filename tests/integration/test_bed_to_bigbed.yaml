@@ -1,0 +1,11 @@
+---
+  - name: test_bed_to_bigbed
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_bed_to_bigbed.wdl
+      tests/integration/json/test_bed_to_bigbed.json
+    files:
+      - path: test-output/segway.bb
+        md5sum: 5a556495c55f60120d5047a6bbe9fe05

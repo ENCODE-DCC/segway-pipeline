@@ -1,5 +1,5 @@
 ---
-  - name: test_segtools_integration
+  - name: test_segtools
     tags:
       - integration
     command: >-
@@ -21,4 +21,4 @@
         md5sum: ebaedfa804b5a15c88851eb5986e8538
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
       - path: test-output/signal_distribution/signal_distribution.tab
-        md5sum: a0ff1697f8ae6380761d349d7109aa61
+        md5sum: df93f0f54b2b5b71a726b740ab3566c6

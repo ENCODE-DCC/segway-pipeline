@@ -1,5 +1,5 @@
 ---
-  - name: test_make_genomedata_integration
+  - name: test_make_genomedata
     tags:
       - integration
     command: >-

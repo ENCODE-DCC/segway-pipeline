@@ -7,8 +7,10 @@ workflow segway {
     input {
         # Pipeline inputs to run from beginning
         Array[File]? bigwigs
+        Array[String]? assays
         File? chrom_sizes
         File annotation_gtf
+        File model_pickle
 
         # Segway resource parameter
         Int num_segway_cpus = 96
@@ -69,19 +71,45 @@ workflow segway {
     File segway_output_bed_ = select_first([segway_output_bed, segway_annotate.output_bed])
     File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
 
-    if (defined(chrom_sizes)) {
-        call bed_to_bigbed { input:
-            segway_output_bed = segway_output_bed_,
-            chrom_sizes = select_first([chrom_sizes]),
-        }
-    }
-
     call segtools { input:
         genomedata = select_first([genomedata, make_genomedata.genomedata]),
         segway_output_bed = segway_output_bed_,
         annotation_gtf = annotation_gtf,
         segway_params = segway_params_,
         flank_bases = segtools_aggregation_flank_bases,
+    }
+
+    if (defined(bigwigs) && defined(assays)) {
+        call make_trackname_assay { input:
+            tracknames = select_first([bigwigs]),
+            assays = select_first([assays]),
+        }
+
+        call interpretation { input:
+            trackname_assay = make_trackname_assay.trackname_assay,
+            model_pickle = model_pickle,
+            feature_aggregation_tab = segtools.feature_aggregation_tab,
+            signal_distribution_tab = segtools.signal_distribution_tab,
+            segment_sizes_tab = segtools.segment_sizes_tab,
+            length_distribution_tab = segtools.length_distribution_tab
+        }
+
+        call relabel { input:
+            bed = segway_output_bed_,
+            mnemonics = interpretation.mnemonics,
+        }
+
+        call recolor_bed { input:
+            bed = relabel.relabeled_bed
+        }
+
+        if (defined(chrom_sizes)) {
+            call bed_to_bigbed as recolored_bed_to_bigbed { input:
+                bed = recolor_bed.recolored_bed,
+                chrom_sizes = select_first([chrom_sizes]),
+                output_stem = "recolored",
+            }
+        }
     }
 }
 
@@ -92,6 +120,7 @@ task make_genomedata {
     }
 
     command <<<
+        set -euo pipefail
         python "$(which make_genomedata.py)" --files ~{sep=" " bigwigs} --sizes ~{chrom_sizes} -o files.genomedata
         python "$(which calculate_num_labels.py)" --num-tracks ~{length(bigwigs)} -o num_labels.txt
     >>>
@@ -123,6 +152,7 @@ task segway_train {
     }
 
     command <<<
+        set -euo pipefail
         mkdir tmp
         export TMPDIR="${PWD}/tmp"
         export SEGWAY_RAND_SEED=112344321
@@ -169,6 +199,7 @@ task segway_annotate {
     }
 
     command <<<
+        set -euo pipefail
         mkdir tmp
         export TMPDIR="${PWD}/tmp"
         export SEGWAY_RAND_SEED=112344321
@@ -201,18 +232,19 @@ task segway_annotate {
 
 task bed_to_bigbed {
     input {
-        File segway_output_bed
+        File bed
         File chrom_sizes
+        String output_stem = "recolored"
     }
 
     command <<<
         set -euo pipefail
-        gzip -dc ~{segway_output_bed} | tail -n +2 > segway.bed
-        bedToBigBed segway.bed ~{chrom_sizes} segway.bb
+        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}.bed
+        bedToBigBed ~{output_stem}.bed ~{chrom_sizes} ~{output_stem}.bb
     >>>
 
     output {
-        File output_big_bed = "segway.bb"
+        File output_big_bed = "~{output_stem}.bb"
     }
 }
 
@@ -226,6 +258,8 @@ task segtools {
     }
 
     command <<<
+        # Can't set the usual values since some of the commands fail with nonzero
+        # set -euo pipefail
         mkdir segway_params && tar xf ~{segway_params} -C segway_params --strip-components 1
         segtools-length-distribution -o length_distribution ~{segway_output_bed}
         segtools-gmtk-parameters  -o gmtk_parameters segway_params/params/params.params
@@ -242,11 +276,14 @@ task segtools {
                 --transformation arcsinh \
                 -o signal_distribution \
                 ~{segway_output_bed} \
-                ~{genomedata}
+                ~{genomedata} \
+            || true
     >>>
 
     output {
         Array[File] length_distribution_info = glob("length_distribution/*")
+        File length_distribution_tab = "length_distribution/length_distribution.tab"
+        File segment_sizes_tab = "length_distribution/segment_sizes.tab"
         Array[File] gmtk_info = glob("gmtk_parameters/*")
         Array[File] feature_aggregation_info = glob("feature_aggregation/*")
         File feature_aggregation_tab = "feature_aggregation/feature_aggregation.tab"
@@ -258,5 +295,130 @@ task segtools {
         cpu: 8
         memory: "16 GB"
         disks: "local-disk 250 SSD"
+    }
+}
+
+task make_trackname_assay {
+    input {
+        Array[String] tracknames
+        Array[String] assays
+        String output_filename = "trackname_assay.txt"
+    }
+
+    command <<<
+        set -euo pipefail
+        python \
+            "$(which make_trackname_assay.py)" \
+            --tracknames ~{sep=" " tracknames} \
+            --assays ~{sep=" " assays} \
+            --output-filename ~{output_filename}
+    >>>
+
+    output {
+        File trackname_assay = "~{output_filename}"
+    }
+
+    runtime {
+        cpu: 1
+        memory: "2 GB"
+        disks: "local-disk 10 SSD"
+    }
+}
+
+
+task interpretation {
+    input {
+        File model_pickle
+        File feature_aggregation_tab
+        File signal_distribution_tab
+        File trackname_assay
+        File segment_sizes_tab
+        File length_distribution_tab
+    }
+
+    command <<<
+        set -euo pipefail
+        export SEGWAY_OUTPUT=segwayOutput
+        export SAMPLE_NAME=sample
+        mkdir -p "${SEGWAY_OUTPUT}/${SAMPLE_NAME}/"
+        mv ~{trackname_assay} "${SEGWAY_OUTPUT}"
+        mv \
+            ~{feature_aggregation_tab} \
+            ~{signal_distribution_tab} \
+            ~{segment_sizes_tab} \
+            ~{length_distribution_tab} \
+            "${SEGWAY_OUTPUT}/${SAMPLE_NAME}"
+        python \
+            "$(which apply_samples.py)" \
+            interpretation-output \
+            --model-path ~{model_pickle} \
+            --input-path "${PWD}/${SEGWAY_OUTPUT}"
+    >>>
+
+    output {
+        Array[File] stats = glob("interpretation-output/stats/*")
+        File mnemonics = "interpretation-output/classification/sample/mnemonics.txt"
+        File classifier_data = "interpretation-output/classification/sample/classifier_data.tab"
+        File classifier_probailities = "interpretation-output/classification/sample/probs.txt"
+    }
+
+    runtime {
+        cpu: 4
+        memory: "16 GB"
+        disks: "local-disk 100 SSD"
+    }
+}
+
+
+task relabel {
+    input {
+        File bed
+        File mnemonics
+        String output_stem = "relabeled"
+    }
+
+    command <<<
+        set -euo pipefail
+        gzip -dc ~{bed} > decompressed.bed
+        python \
+            "$(which relabel.py)" \
+            -o ~{output_stem}.bed \
+            decompressed.bed \
+            ~{mnemonics}
+        gzip -n ~{output_stem}.bed
+    >>>
+
+    output {
+        File relabeled_bed = "~{output_stem}.bed.gz"
+    }
+
+    runtime {
+        cpu: 1
+        memory: "2 GB"
+        disks: "local-disk 20 SSD"
+    }
+}
+
+task recolor_bed {
+    input {
+        File bed
+        String output_filename = "recolored.bed"
+    }
+
+    command <<<
+        set -euo pipefail
+        gzip -dc ~{bed} > decompressed.bed
+        python "$(which recolor_bed.py)" -o ~{output_filename} decompressed.bed
+        gzip -n ~{output_filename}
+    >>>
+
+    output {
+        File recolored_bed = "~{output_filename}.gz"
+    }
+
+    runtime {
+        cpu: 1
+        memory: "2 GB"
+        disks: "local-disk 20 SSD"
     }
 }

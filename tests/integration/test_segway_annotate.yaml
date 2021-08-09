@@ -1,5 +1,5 @@
 ---
-  - name: test_segway_annotate_integration
+  - name: test_segway_annotate
     tags:
       - integration
     command: >-

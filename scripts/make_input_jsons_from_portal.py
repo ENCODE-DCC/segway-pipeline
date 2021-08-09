@@ -79,7 +79,10 @@ class Client:
         """
         url = self.url_joiner.resolve(url_or_path)
         response = httpx.get(
-            url, auth=self.keypair, headers={"Accept": "application/json"}
+            url,
+            auth=self.keypair,
+            headers={"Accept": "application/json"},
+            trust_env=False,
         )
         response.raise_for_status()
         res = response.json()
