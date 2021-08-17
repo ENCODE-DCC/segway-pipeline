@@ -39,7 +39,7 @@ def test_segtools_feature_aggregation_splicing_pdfs_match(
     result = workflow_dir / Path(
         "test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.splicing.pdf"
     )
-    expected = test_data_dir / Path("segway_full_feature_aggregation.splicing.pdf")
+    expected = test_data_dir / Path("feature_aggregation.splicing.pdf")
     assert pdfs_match(result, expected)
 
 
@@ -48,7 +48,7 @@ def test_segtools_feature_aggregation_translation_pdfs_match(
     workflow_dir, test_data_dir, pdfs_match
 ):
     result = workflow_dir / Path(
-        "test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/segway_full_feature_aggegation.translation.pdf"
+        "test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf"
     )
     expected = test_data_dir / Path("feature_aggregation.translation.pdf")
     assert pdfs_match(result, expected)

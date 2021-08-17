@@ -33,8 +33,8 @@
       - path: test-output/interpretation-output/classification/sample/probs.txt
         md5sum: bf4537129f23da02d417c1b7f84bc43e
       - path: test-output/relabeled.bed.gz
-        md5sum: fb3c85fbd962ddac5f00392d8627b4ba
+        md5sum: b944779b1bbf82f21024500530630e5b
       - path: test-output/recolored.bed.gz
-        md5sum: b654ef40451a820ecdc2acb1a91a50ec
+        md5sum: e7144746be32a0a47502cf59242d1606
       - path: test-output/recolored.bb
         md5sum: 832bf49ff6c99da5f1359c534848c447
