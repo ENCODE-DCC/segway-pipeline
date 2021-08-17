@@ -55,10 +55,13 @@ def traindirs_match(skip_n_lines_md5):
                 continue
             for key in ("cmdline", "output", "triangulation"):
                 if key in f1.parts:
+                    print(f"Skipping file {str(f1)}")
                     continue
             if "log" in f1.parts:
                 if not f1.match("*.tab") or not f1.match("jt_info.txt"):
+                    print(f"Skipping file {str(f1)}")
                     continue
+            print(f"Checking file {str(f1)}")
             shared_root_index = f1.parts.index("traindir")
             f2 = [
                 i
