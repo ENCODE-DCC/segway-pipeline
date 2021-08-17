@@ -25,16 +25,16 @@
         md5sum: dbf80c3884f563ea905f4fa1d7b098ed
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
       - path: test-output/signal_distribution/signal_distribution.tab
-        md5sum: 7c8c03e4c1d7b8c4ed1bbfd307759d23
+        md5sum: 3bd8bd25e1b7ad64a4bb57cd832296d1
       - path: test-output/interpretation-output/classification/sample/mnemonics.txt
         md5sum: 8a8d3e3a2a4486109fdc35c245e91e5c
       - path: test-output/interpretation-output/classification/sample/classifier_data.tab
-        md5sum: a754b71b4f91ea7ca835bbd44f2f0d5c
+        md5sum: 1ad6339b331a1b6fb2a8c18ae14422ff
       - path: test-output/interpretation-output/classification/sample/probs.txt
         md5sum: bf4537129f23da02d417c1b7f84bc43e
       - path: test-output/relabeled.bed.gz
-        md5sum: b944779b1bbf82f21024500530630e5b
+        md5sum: 796c1ed26c21d8e7d4573ac9308478a4
       - path: test-output/recolored.bed.gz
-        md5sum: e7144746be32a0a47502cf59242d1606
+        md5sum: c4ab8dce25822772c2e142c98785681d
       - path: test-output/recolored.bb
         md5sum: 832bf49ff6c99da5f1359c534848c447
