@@ -48,10 +48,10 @@ RUN conda \
 
 WORKDIR /opt
 
-RUN git clone https://github.com/paul-sud/interpretation_samples.git && \
+RUN git clone https://github.com/marjanfarahbod/interpretation_samples.git && \
     chmod a+w interpretation_samples && \
     cd interpretation_samples && \
-    git checkout 128fb6abe169052e7946dc2e634ba69e73174276 && \
+    git checkout aa425f56a9f671114b7a09fb35d9c3e85d40c41b && \
     rm -rf segwayOutput testworkdir model.pickle.gz && \
     chmod a+x apply_samples.py
 
