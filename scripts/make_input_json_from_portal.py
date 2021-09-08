@@ -65,7 +65,7 @@ def main() -> None:
     outfile = (
         args.outfile
         if args.outfile is not None
-        else f"{args.biosample_term_name.replace(' ', '_')}.json"
+        else f"{args.biosample_term_name.replace(' ', '_')}_{args.donor}.json"
     )
     _write_json(input_json, outfile)
 
