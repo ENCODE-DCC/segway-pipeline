@@ -42,6 +42,14 @@ InputJson = Dict[str, Union[float, int, str, List[str]]]
 def main() -> None:
     parser = _get_parser()
     args = parser.parse_args()
+    outfile = (
+        args.outfile
+        if args.outfile is not None
+        else f"{args.biosample_term_name.replace(' ', '_')}_{args.donor}.json"
+    )
+    outfile_path = Path(outfile)
+    if outfile_path.exists():
+        raise ValueError(f"Would overwrite {str(outfile_path)}, exiting")
     client = _get_client()
     experiments = _get_experiments_from_donor(
         client, args.donor, args.biosample_term_name
@@ -62,12 +70,7 @@ def main() -> None:
     input_json = _make_input_json(
         files, extra_props=_ASSEMBLY_REFERENCE_FILES[args.assembly]
     )
-    outfile = (
-        args.outfile
-        if args.outfile is not None
-        else f"{args.biosample_term_name.replace(' ', '_')}_{args.donor}.json"
-    )
-    _write_json(input_json, outfile)
+    _write_json(input_json, outfile_path)
 
 
 def _get_experiments_from_donor(
@@ -108,7 +111,7 @@ def _get_portal_files(
     skip_assays: Optional[Iterable[str]] = None,
     chip_targets: Optional[Iterable[str]] = None,
 ) -> List[str]:
-    datasets_files: Dict[Tuple[str, ...], str] = {}
+    datasets_files: Dict[Tuple[str, ...], Dict[str, Any]] = {}
     found_targets: Set[str] = set()
     for dataset in experiments:
         assay_title = dataset["assay_title"]
@@ -162,8 +165,16 @@ def _get_portal_files(
                 else:
                     if file.get("preferred_default") is not True:
                         continue
+                    found_targets.add(assay_title)
+                rfa = dataset["award"]["rfa"]
+                new_payload = {"rfa": rfa, **file}
                 if hash_key not in datasets_files:
-                    datasets_files[hash_key] = file["cloud_metadata"]["url"]
+                    datasets_files[hash_key] = new_payload
+                elif rfa > datasets_files[hash_key]["rfa"]:
+                    # It's OK to have duplicates between ENC3/4 and we always pick ENC4
+                    datasets_files[hash_key] = new_payload
+                elif rfa < datasets_files[hash_key]["rfa"]:
+                    continue
                 else:
                     raise ValueError(
                         (
@@ -183,8 +194,8 @@ def _get_portal_files(
         raise ValueError(
             f"Could not find one or more of the required ChIP targets in the experiments provided, missing {', '.join(missing_core_targets)}"
         )
-    print(f"Found targets {', '.join(found_targets)}")
-    files = list(datasets_files.values())
+    print(f"Found targets/assays {', '.join(found_targets)}")
+    files = [i["cloud_metadata"]["url"] for i in datasets_files.values()]
     if not files:
         raise ValueError("Could not find any files")
     return files
@@ -249,9 +260,8 @@ def _make_input_json(portal_files: List[str], extra_props: Dict[str, str]) -> In
     return input_json
 
 
-def _write_json(input_json: InputJson, path: str) -> None:
-    with open(path, "w") as f:
-        f.write(json.dumps(input_json, indent=2))
+def _write_json(input_json: InputJson, path: Path) -> None:
+    path.write_text(json.dumps(input_json, indent=2))
 
 
 if __name__ == "__main__":
