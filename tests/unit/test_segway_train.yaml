@@ -1,5 +1,5 @@
 ---
-  - name: test_segway_train_no_prior_strength
+  - name: test_segway_train_no_prior_strength_unit
     tags:
       - unit
     command: >-

@@ -53,7 +53,7 @@ def traindirs_match(skip_n_lines_md5):
         for f1 in traindir1_extracted.glob("**/*"):
             if not f1.is_file():
                 continue
-            if "cmdline" in f1.parts or "output" in f1.parts:
+            if any(key in f1.parts for key in ("cmdline", "output", "triangulation")):
                 continue
             if "log" in f1.parts:
                 if not f1.match("*.tab") or not f1.match("jt_info.txt"):
@@ -64,11 +64,7 @@ def traindirs_match(skip_n_lines_md5):
                 for i in f2_paths
                 if i.parts[shared_root_index:] == f1.parts[shared_root_index:]
             ][0]
-            if "triangulation" in f1.parts:
-                n_lines = 17
-                assert skip_n_lines_md5(f1, n_lines) == skip_n_lines_md5(f2, n_lines)
-            else:
-                assert md5sum(f1) == md5sum(f2)
+            assert md5sum(f1) == md5sum(f2)
         return True
 
     return _traindirs_match

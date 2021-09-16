@@ -1,0 +1,4 @@
+{
+  "test_relabel.bed": "tests/data/relabel_test_input.bed.gz",
+  "test_relabel.mnemonics": "tests/data/relabel_test_mnemonics.txt"
+}

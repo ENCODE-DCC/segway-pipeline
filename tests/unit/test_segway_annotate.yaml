@@ -1,5 +1,5 @@
 ---
-  - name: test_segway_annotate
+  - name: test_segway_annotate_unit
     tags:
       - unit
     command: >-

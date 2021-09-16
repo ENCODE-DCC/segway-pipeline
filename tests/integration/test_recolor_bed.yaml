@@ -1,0 +1,11 @@
+---
+  - name: test_recolor_bed
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_recolor_bed.wdl
+      tests/integration/json/test_recolor_bed.json
+    files:
+      - path: test-output/recolored.bed.gz
+        md5sum: 63eb85fa168c7494e9c4f3ba41d2132d

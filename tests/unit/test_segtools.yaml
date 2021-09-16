@@ -1,5 +1,5 @@
 ---
-  - name: test_segtools
+  - name: test_segtools_unit
     tags:
       - unit
     command: >-

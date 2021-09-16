@@ -107,7 +107,8 @@ jobs:
             pyenv global 3.7.0
             pip install --upgrade pip
             pip install tox
-            tox -e wdl -- --tag << parameters.tag >> --wt << parameters.num_parallel_workflows >>
+            tox -e wdl -- --kwd --tag << parameters.tag >> --wt << parameters.num_parallel_workflows >>
+          no_output_timeout: 20m
 
   build:
     <<: *defaults
@@ -122,9 +123,6 @@ jobs:
             docker pull encodedcc/${CIRCLE_PROJECT_REPONAME}:template
             docker build \
               --cache-from encodedcc/${CIRCLE_PROJECT_REPONAME}:template \
-              --build-arg GIT_COMMIT_HASH=${CIRCLE_SHA1} \
-              --build-arg BRANCH=${CIRCLE_BRANCH} \
-              --build-arg BUILD_TAG=${SEGWAY_DOCKER_IMAGE_TAG} \
               -t ${SEGWAY_DOCKER_IMAGE_TAG} \
               -t encodedcc/${CIRCLE_PROJECT_REPONAME}:template \
               -f Dockerfile .
@@ -168,15 +166,15 @@ workflows:
             - lint
       - test_wdl:
           name: test_wdl_integration
-          resource_class: large
+          resource_class: xlarge
           tag: integration
-          num_parallel_workflows: 8
+          num_parallel_workflows: 12
           requires:
             - build
             - lint
       - test_wdl:
           name: test_wdl_functional
-          resource_class: large
+          resource_class: xlarge
           tag: functional
           num_parallel_workflows: 8
           requires:

@@ -1,5 +1,0 @@
-{
-  "segway.annotation_gtf": "tests/data/dummy.txt",
-  "segway.genomedata": "tests/data/dummy.txt",
-  "segway.segway_traindir": "tests/data/dummy.txt"
-}

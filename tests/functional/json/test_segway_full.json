@@ -1,11 +1,25 @@
 {
   "segway.annotation_gtf": "tests/data/gencode.v29.primary_assembly.annotation_UCSC_names_chr19.gtf.gz",
+  "segway.assays": [
+    "H3K36me3",
+    "H3K27me3",
+    "H3K9me3",
+    "H3K4me1",
+    "H3K4me3",
+    "H3K27ac"
+  ],
   "segway.bigwigs": [
-    "tests/data/ENCFF685ECA_chr19.bw"
+    "tests/data/ENCFF685ECA_chr19.bw",
+    "tests/data/ENCFF725VID_chr19.bw",
+    "tests/data/ENCFF631FTI_chr19.bw",
+    "tests/data/ENCFF328PXQ_chr19.bw",
+    "tests/data/ENCFF267OQQ_chr19.bw",
+    "tests/data/ENCFF063VLJ_chr19.bw"
   ],
   "segway.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv",
   "segway.max_train_rounds": 5,
   "segway.minibatch_fraction": 0.1,
+  "segway.model_pickle": "tests/data/model.pickle.gz",
   "segway.num_instances": 2,
   "segway.num_labels": 10,
   "segway.num_segway_cpus": 8,

@@ -1,0 +1,11 @@
+---
+  - name: test_relabel
+    tags:
+      - integration
+    command: >-
+      tests/caper_run.sh
+      tests/integration/wdl/test_relabel.wdl
+      tests/integration/json/test_relabel.json
+    files:
+      - path: test-output/relabeled.bed.gz
+        md5sum: 41dac67996cc35dff62cbebeae3048a4
