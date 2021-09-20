@@ -17,7 +17,7 @@ def test_segway_annotate_bed_files_match(test_data_dir, workflow_dir, skip_n_lin
     """
     bed_path = workflow_dir / Path("test-output/segway.bed.gz")
     md5sum = skip_n_lines_md5(bed_path, n_lines=1)
-    assert md5sum == "f35621a1513cf7d1c09c7af88282a30f"
+    assert md5sum == "acf4ffa877f09d32e6d761bc5cd899f1"
 
 
 @pytest.mark.workflow("test_segway_full")

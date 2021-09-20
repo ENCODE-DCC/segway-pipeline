@@ -25,11 +25,11 @@
         md5sum: 1d3fefc4a0b02fcc36fb5fc4fec2e3d8
       - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
       - path: test-output/signal_distribution/signal_distribution.tab
-        md5sum: 8667d58579e879b360651a5ad501bb8e
+        md5sum: 4f3d89e1cdf4dc5fd6d378a1c141d3cb
       - path: test-output/interpretation-output/classification/sample/mnemonics.txt
         md5sum: 28fec822b1a93af385fb10fa9d6f7bfd
       - path: test-output/interpretation-output/classification/sample/classifier_data.tab
-        md5sum: db7139ed7e0a8efdabbfb8ea37af164a
+        md5sum: 0f741bc8db25862441a5a764b61bc9ae
       - path: test-output/interpretation-output/classification/sample/probs.txt
         md5sum: 88bd460092f615629d7cc1c54c1945eb
       - path: test-output/relabeled.bed.gz
