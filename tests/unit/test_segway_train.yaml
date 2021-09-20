@@ -16,3 +16,5 @@
         - --segtransition-weight-scale 5
         - --prior_strength 1.0
         - --max-train-rounds 25
+        - --ruler-scale 50
+        - --track-weight 0.01
