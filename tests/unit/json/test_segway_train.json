@@ -5,6 +5,7 @@
   "test_segway_train.ncpus": 4,
   "test_segway_train.num_instances": 3,
   "test_segway_train.num_labels": 2,
+  "test_segway_train.prior_strength": 1.0,
   "test_segway_train.resolution": 100,
   "test_segway_train.segtransition_weight_scale": 5.0
 }

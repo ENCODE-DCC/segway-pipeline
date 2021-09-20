@@ -1,5 +1,5 @@
 ---
-  - name: test_segway_train_no_prior_strength_unit
+  - name: test_segway_train_unit
     tags:
       - unit
     command: >-
@@ -14,6 +14,5 @@
         - --minibatch-fraction 0.01
         - --num-instances 3
         - --segtransition-weight-scale 5
+        - --prior_strength 1.0
         - --max-train-rounds 25
-      must_not_contain:
-        - --prior_strength
