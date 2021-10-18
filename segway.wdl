@@ -1,9 +1,12 @@
 version 1.0
 
-#CAPER docker encodedcc/segway-pipeline:0.1.0
-#CAPER singularity docker://encodedcc/segway-pipeline:0.1.0
-
 workflow segway {
+    meta {
+        version: "0.1.0"
+        caper_docker: "encodedcc/hic-pipeline:0.1.0"
+        caper_singularity: "docker://encodedcc/hic-pipeline:0.1.0"
+    }
+
     input {
         # Pipeline inputs to run from beginning
         Array[File]? bigwigs
@@ -258,7 +261,7 @@ task bed_to_bigbed {
     >>>
 
     output {
-        File output_big_bed = "~{output_stem}.bb"
+        File bigbed = "~{output_stem}.bb"
     }
 }
 
