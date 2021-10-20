@@ -258,10 +258,12 @@ task bed_to_bigbed {
         set -euo pipefail
         gzip -dc ~{bed} | tail -n +2 > ~{output_stem}.bed
         bedToBigBed ~{output_stem}.bed ~{chrom_sizes} ~{output_stem}.bb
+        gzip -n ~{output_stem}.bed
     >>>
 
     output {
         File bigbed = "~{output_stem}.bb"
+        File bed_no_header = "~{output_stem}.bed.gz"
     }
 }
 
