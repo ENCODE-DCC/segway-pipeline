@@ -262,7 +262,7 @@ task bed_to_bigbed {
 
     output {
         File bigbed = "~{output_stem}.bb"
-        File bed_no_header = "~{output_stem}.bed.gz"
+        File bed_no_header = "~{output_stem}_no_header.bed.gz"
     }
 }
 
