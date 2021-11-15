@@ -52,7 +52,7 @@ RUN git clone https://github.com/marjanfarahbod/interpretation_samples.git && \
     chmod a+w interpretation_samples && \
     cd interpretation_samples && \
     git checkout aa425f56a9f671114b7a09fb35d9c3e85d40c41b && \
-    rm -rf segwayOutput testworkdir model.pickle.gz && \
+    rm -rf segwayOutput testworkdir && \
     chmod a+x apply_samples.py
 
 # Needed for tests that run with non-root user

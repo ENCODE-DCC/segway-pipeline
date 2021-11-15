@@ -13,7 +13,6 @@ workflow segway {
         Array[String]? assays
         File? chrom_sizes
         File annotation_gtf
-        File model_pickle
 
         # Segway resource parameter
         Int num_segway_cpus = 96
@@ -93,7 +92,6 @@ workflow segway {
 
         call interpretation { input:
             trackname_assay = make_trackname_assay.trackname_assay,
-            model_pickle = model_pickle,
             feature_aggregation_tab = segtools.feature_aggregation_tab,
             signal_distribution_tab = segtools.signal_distribution_tab,
             segment_sizes_tab = segtools.segment_sizes_tab,
@@ -348,7 +346,6 @@ task make_trackname_assay {
 
 task interpretation {
     input {
-        File model_pickle
         File feature_aggregation_tab
         File signal_distribution_tab
         File trackname_assay
@@ -371,7 +368,7 @@ task interpretation {
         python \
             "$(which apply_samples.py)" \
             interpretation-output \
-            --model-path ~{model_pickle} \
+            --model-path /opt/interpretation_samples/model.pickle.gz \
             --input-path "${PWD}/${SEGWAY_OUTPUT}"
     >>>
 

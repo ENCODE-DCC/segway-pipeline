@@ -19,7 +19,6 @@
   "segway.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv",
   "segway.max_train_rounds": 5,
   "segway.minibatch_fraction": 0.1,
-  "segway.model_pickle": "tests/data/model.pickle.gz",
   "segway.num_instances": 2,
   "segway.num_labels": 10,
   "segway.num_segway_cpus": 8,
