@@ -250,7 +250,7 @@ task bed_to_bigbed {
     input {
         File bed
         File chrom_sizes
-        String output_stem = "recolored"
+        String output_stem = "segway"
     }
 
     command <<<
