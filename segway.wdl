@@ -255,9 +255,9 @@ task bed_to_bigbed {
 
     command <<<
         set -euo pipefail
-        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}.bed
+        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}_no_header.bed
         bedToBigBed ~{output_stem}.bed ~{chrom_sizes} ~{output_stem}.bb
-        gzip -n ~{output_stem}.bed
+        gzip -n ~{output_stem}_no_header.bed
     >>>
 
     output {
