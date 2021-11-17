@@ -17,7 +17,7 @@ def test_segway_annotate_bed_files_match(test_data_dir, workflow_dir, skip_n_lin
     """
     bed_path = workflow_dir / Path("test-output/segway.bed.gz")
     md5sum = skip_n_lines_md5(bed_path, n_lines=1)
-    assert md5sum == "acf4ffa877f09d32e6d761bc5cd899f1"
+    assert md5sum == "023096ca150a0752e8bacc6c7c52019f"
 
 
 @pytest.mark.workflow("test_segway_full")
@@ -27,7 +27,7 @@ def test_segway_full_relabeled_bed_files_match(workflow_dir, skip_n_lines_md5):
     """
     bed_path = workflow_dir / Path("test-output/relabeled.bed.gz")
     md5sum = skip_n_lines_md5(bed_path, n_lines=1)
-    assert md5sum == "69b071c653c119320aaadaf2eef5f63f"
+    assert md5sum == "dbbd3c7965685a2b28e04e4baa82471b"
 
 
 @pytest.mark.workflow("test_segway_full")
@@ -37,7 +37,7 @@ def test_segway_full_recolored_bed_files_match(workflow_dir, skip_n_lines_md5):
     """
     bed_path = workflow_dir / Path("test-output/recolored.bed.gz")
     md5sum = skip_n_lines_md5(bed_path, n_lines=1)
-    assert md5sum == "a6318bcfbce45786353ae5f2fd25e13c"
+    assert md5sum == "9896aa48cf4a7b3164952ae797b4cff2"
 
 
 @pytest.mark.workflow("test_segway_full")
