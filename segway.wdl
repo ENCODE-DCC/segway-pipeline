@@ -24,6 +24,7 @@ workflow segway {
         Int num_instances = 10
         Float prior_strength = 1.0
         Float segtransition_weight_scale = 1.0
+        Float track_weight = 0.01
         Int ruler_scale = 100
 
         # Segtools parameters
@@ -32,7 +33,6 @@ workflow segway {
         # Optional inputs for starting the pipeline not from the beginning
         File? genomedata
         Int? num_labels
-        Int? num_tracks
         File? segway_traindir
         File? segway_output_bed
         File? segway_params
@@ -56,8 +56,7 @@ workflow segway {
             prior_strength = prior_strength,
             segtransition_weight_scale = segtransition_weight_scale,
             ruler_scale = ruler_scale,
-            # track_weight = 1.0 / (100.0 * select_first([num_tracks, make_genomedata.num_tracks])),
-            track_weight = 1.0 / 100.0,
+            track_weight = track_weight,
             minibatch_fraction = minibatch_fraction,
             max_train_rounds = max_train_rounds,
             num_instances = num_instances,
