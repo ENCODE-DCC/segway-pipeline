@@ -235,7 +235,6 @@ task segway_annotate {
         File segway_params = "training_params.tar.gz"
         File identifydir = "identifydir.tar.gz"
         File output_bed = "segway.bed.gz"
-        Array[File] logs = glob("identifydir/output/e/identify/*")
     }
 
     runtime {
