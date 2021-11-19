@@ -1,16 +1,18 @@
 version 1.0
 
-#CAPER docker encodedcc/segway-pipeline:0.1.0
-#CAPER singularity docker://encodedcc/segway-pipeline:0.1.0
-
 workflow segway {
+    meta {
+        version: "0.1.0"
+        caper_docker: "encodedcc/hic-pipeline:0.1.0"
+        caper_singularity: "docker://encodedcc/hic-pipeline:0.1.0"
+    }
+
     input {
         # Pipeline inputs to run from beginning
         Array[File]? bigwigs
         Array[String]? assays
         File? chrom_sizes
         File annotation_gtf
-        File model_pickle
 
         # Segway resource parameter
         Int num_segway_cpus = 96
@@ -20,8 +22,10 @@ workflow segway {
         Float minibatch_fraction = 0.01
         Int max_train_rounds = 25
         Int num_instances = 10
-        Float prior_strength = 1
-        Float? segtransition_weight_scale
+        Float prior_strength = 1.0
+        Float segtransition_weight_scale = 1.0
+        Float track_weight = 0.01
+        Int ruler_scale = 100
 
         # Segtools parameters
         Int segtools_aggregation_flank_bases = 10000
@@ -48,15 +52,15 @@ workflow segway {
         call segway_train { input:
             genomedata = select_first([genomedata, make_genomedata.genomedata]),
             num_labels = select_first([num_labels, make_genomedata.num_labels]),
-            ncpus = num_segway_cpus,
             resolution = resolution,
+            prior_strength = prior_strength,
+            segtransition_weight_scale = segtransition_weight_scale,
+            ruler_scale = ruler_scale,
+            track_weight = track_weight,
             minibatch_fraction = minibatch_fraction,
             max_train_rounds = max_train_rounds,
             num_instances = num_instances,
-            # specifying prior strength causes segway to crash:
-            # https://bitbucket.org/hoffmanlab/segway/issues/136/using-the-prior-strength-option-causes
-            # prior_strength = prior_strength,
-            segtransition_weight_scale = select_first([make_genomedata.num_tracks, segtransition_weight_scale])
+            ncpus = num_segway_cpus,
         }
     }
 
@@ -87,7 +91,6 @@ workflow segway {
 
         call interpretation { input:
             trackname_assay = make_trackname_assay.trackname_assay,
-            model_pickle = model_pickle,
             feature_aggregation_tab = segtools.feature_aggregation_tab,
             signal_distribution_tab = segtools.signal_distribution_tab,
             segment_sizes_tab = segtools.segment_sizes_tab,
@@ -142,13 +145,15 @@ task segway_train {
     input {
         File genomedata
         Int num_labels
-        Int ncpus
         Int resolution
+        Float prior_strength
+        Float segtransition_weight_scale
+        Int ruler_scale
+        Float track_weight
         Float minibatch_fraction
         Int max_train_rounds
         Int num_instances
-        Float? prior_strength
-        Float segtransition_weight_scale
+        Int ncpus
     }
 
     command <<<
@@ -164,10 +169,13 @@ task segway_train {
             --resolution ~{resolution} \
             --minibatch-fraction ~{minibatch_fraction} \
             --num-instances ~{num_instances} \
-            ~{if defined(prior_strength) then "--prior_strength " + prior_strength else ""} \
+            --prior-strength ~{prior_strength} \
             --segtransition-weight-scale ~{segtransition_weight_scale} \
+            --ruler-scale ~{ruler_scale} \
+            --track-weight ~{track_weight} \
             --max-train-rounds ~{max_train_rounds} \
-            ~{genomedata} traindir
+            ~{genomedata} \
+            traindir
         # See https://stackoverflow.com/a/54908072 and
         # https://reproducible-builds.org/docs/archives/. Want to make tar idempotent
         find traindir -print0 |
@@ -215,12 +223,18 @@ task segway_annotate {
             --no-recursion --null -T - -cf training_params.tar
         gzip -nc training_params.tar > training_params.tar.gz
         gzip -nc segway.bed > segway.bed.gz
+        find identifydir -print0 |
+            LC_ALL=C sort -z |
+            tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
+            --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
+            --no-recursion --null -T - -cf identifydir.tar
+        gzip -nc identifydir.tar > identifydir.tar.gz
     >>>
 
     output {
         File segway_params = "training_params.tar.gz"
+        File identifydir = "identifydir.tar.gz"
         File output_bed = "segway.bed.gz"
-        Array[File] logs = glob("identifydir/output/e/identify/*")
     }
 
     runtime {
@@ -234,17 +248,19 @@ task bed_to_bigbed {
     input {
         File bed
         File chrom_sizes
-        String output_stem = "recolored"
+        String output_stem = "segway"
     }
 
     command <<<
         set -euo pipefail
-        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}.bed
-        bedToBigBed ~{output_stem}.bed ~{chrom_sizes} ~{output_stem}.bb
+        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}_no_header.bed
+        bedToBigBed ~{output_stem}_no_header.bed ~{chrom_sizes} ~{output_stem}.bb
+        gzip -n ~{output_stem}_no_header.bed
     >>>
 
     output {
-        File output_big_bed = "~{output_stem}.bb"
+        File bigbed = "~{output_stem}.bb"
+        File bed_no_header = "~{output_stem}_no_header.bed.gz"
     }
 }
 
@@ -328,7 +344,6 @@ task make_trackname_assay {
 
 task interpretation {
     input {
-        File model_pickle
         File feature_aggregation_tab
         File signal_distribution_tab
         File trackname_assay
@@ -351,7 +366,7 @@ task interpretation {
         python \
             "$(which apply_samples.py)" \
             interpretation-output \
-            --model-path ~{model_pickle} \
+            --model-path /opt/interpretation_samples/model.pickle.gz \
             --input-path "${PWD}/${SEGWAY_OUTPUT}"
     >>>
 

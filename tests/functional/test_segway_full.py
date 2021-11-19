@@ -11,39 +11,33 @@ def test_segway_train_traindirs_match(test_data_dir, workflow_dir, traindirs_mat
 
 
 @pytest.mark.workflow("test_segway_full")
-def test_segway_annotate_bed_files_match(
-    test_data_dir, workflow_dir, skip_n_lines_and_compare
-):
+def test_segway_annotate_bed_files_match(test_data_dir, workflow_dir, skip_n_lines_md5):
     """
     Bed header contains nondeterministic workflow data, need to skip it when comparing.
     """
-    actual_bed_path = workflow_dir / Path("test-output/segway.bed.gz")
-    expected_bed_path = test_data_dir / Path("segway_full.bed.gz")
-    assert skip_n_lines_and_compare(actual_bed_path, expected_bed_path, n_lines=1)
+    bed_path = workflow_dir / Path("test-output/segway.bed.gz")
+    md5sum = skip_n_lines_md5(bed_path, n_lines=1)
+    assert md5sum == "023096ca150a0752e8bacc6c7c52019f"
 
 
 @pytest.mark.workflow("test_segway_full")
-def test_segway_full_relabeled_bed_files_match(
-    test_data_dir, workflow_dir, skip_n_lines_md5
-):
+def test_segway_full_relabeled_bed_files_match(workflow_dir, skip_n_lines_md5):
     """
     Bed header contains nondeterministic workflow data, need to skip it when comparing.
     """
     bed_path = workflow_dir / Path("test-output/relabeled.bed.gz")
     md5sum = skip_n_lines_md5(bed_path, n_lines=1)
-    assert md5sum == "f35621a1513cf7d1c09c7af88282a30f"
+    assert md5sum == "dbbd3c7965685a2b28e04e4baa82471b"
 
 
 @pytest.mark.workflow("test_segway_full")
-def test_segway_full_recolored_bed_files_match(
-    test_data_dir, workflow_dir, skip_n_lines_md5
-):
+def test_segway_full_recolored_bed_files_match(workflow_dir, skip_n_lines_md5):
     """
     Bed header contains nondeterministic workflow data, need to skip it when comparing.
     """
     bed_path = workflow_dir / Path("test-output/recolored.bed.gz")
     md5sum = skip_n_lines_md5(bed_path, n_lines=1)
-    assert md5sum == "03c5b47a4dd6988a60f2418770a5e51f"
+    assert md5sum == "9896aa48cf4a7b3164952ae797b4cff2"
 
 
 @pytest.mark.workflow("test_segway_full")

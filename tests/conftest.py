@@ -64,7 +64,7 @@ def traindirs_match(skip_n_lines_md5):
                 for i in f2_paths
                 if i.parts[shared_root_index:] == f1.parts[shared_root_index:]
             ][0]
-            assert md5sum(f1) == md5sum(f2)
+            assert md5sum(f1) == md5sum(f2), f"md5sums of {f1} and {f2} do not match"
         return True
 
     return _traindirs_match

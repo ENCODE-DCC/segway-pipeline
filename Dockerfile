@@ -33,7 +33,7 @@ RUN conda \
         pandas==0.25.3 \
         psutil==5.8.0 \
         segtools=="${SEGTOOLS_VERSION}" \
-        segway==3.0 && \
+        segway==3.0.3 && \
     /opt/conda/bin/pip install scikit-learn==0.22.2.post1 && \
     conda install -c r r-ggplot2==3.1.1 && \
     conda create -y -n segtools-signal-distribution python=2.7 && \
@@ -52,7 +52,7 @@ RUN git clone https://github.com/marjanfarahbod/interpretation_samples.git && \
     chmod a+w interpretation_samples && \
     cd interpretation_samples && \
     git checkout aa425f56a9f671114b7a09fb35d9c3e85d40c41b && \
-    rm -rf segwayOutput testworkdir model.pickle.gz && \
+    rm -rf segwayOutput testworkdir && \
     chmod a+x apply_samples.py
 
 # Needed for tests that run with non-root user

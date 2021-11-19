@@ -1,7 +1,6 @@
 {
   "test_interpretation.feature_aggregation_tab": "tests/data/feature_aggregation.tab",
   "test_interpretation.length_distribution_tab": "tests/data/length_distribution.tab",
-  "test_interpretation.model_pickle": "tests/data/model.pickle.gz",
   "test_interpretation.segment_sizes_tab": "tests/data/segment_sizes.tab",
   "test_interpretation.signal_distribution_tab": "tests/data/signal_distribution.tab",
   "test_interpretation.trackname_assay": "tests/data/trackname_assay.txt"
