@@ -1,5 +1,5 @@
 __title__ = "segway-pipeline"
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __description__ = "Python scripts required for running ENCODE Segway pipeline."
 __url__ = "https://github.com/ENCODE-DCC/segway-pipeline"
 __uri__ = __url__

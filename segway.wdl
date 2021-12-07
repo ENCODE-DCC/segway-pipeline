@@ -2,9 +2,9 @@ version 1.0
 
 workflow segway {
     meta {
-        version: "0.1.0"
-        caper_docker: "encodedcc/hic-pipeline:0.1.0"
-        caper_singularity: "docker://encodedcc/hic-pipeline:0.1.0"
+        version: "1.0.0"
+        caper_docker: "encodedcc/segway-pipeline:1.0.0"
+        caper_singularity: "docker://encodedcc/segway-pipeline:1.0.0"
     }
 
     input {
