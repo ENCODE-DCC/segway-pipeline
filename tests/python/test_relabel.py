@@ -12,8 +12,6 @@ def mnemonics_file_handle():
 
 def test_relabel(mnemonics_file_handle):
     bed_data = (
-        'track autoScale=off description="foo" itemRgb=on name=segway viewLimits=0:1 '
-        "visibility=dense\n"
         "chr19\t0\t90800\t0\t1000\t.\t0\t90800\t102,102,102\n"
         "chr19\t90800\t91100\t1\t1000\t.\t90800\t91100\t217,95,2\n"
     )
@@ -21,8 +19,6 @@ def test_relabel(mnemonics_file_handle):
     output_file_handle = StringIO("w", newline="")
     relabel(bed_file_handle, mnemonics_file_handle, output_file_handle)
     assert output_file_handle.getvalue() == (
-        'track autoScale=off description="foo" itemRgb=on name=segway viewLimits=0:1 '
-        "visibility=dense\n"
         "chr19\t0\t90800\tfoo\t1000\t.\t0\t90800\t102,102,102\n"
         "chr19\t90800\t91100\tbar\t1000\t.\t90800\t91100\t217,95,2\n"
     )

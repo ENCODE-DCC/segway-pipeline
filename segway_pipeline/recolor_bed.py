@@ -61,15 +61,10 @@ def recolor_bed(
     output_file_handle: IO[str],
     labels_to_colors: Dict[str, Colors] = LABELS_TO_COLORS,
 ) -> None:
-    """
-    The first row of the beds is the UCSC track definition line which should not be
-    processed
-    """
     input_reader = csv.reader(input_file_handle, delimiter="\t", lineterminator="\n")
     output_writer = csv.writer(
         output_file_handle, delimiter="\t", lineterminator="\n", quotechar="'"
     )
-    output_writer.writerow(next(input_reader))
     for row in input_reader:
         processed = process_row(row, labels_to_colors=labels_to_colors)
         output_writer.writerow(processed)

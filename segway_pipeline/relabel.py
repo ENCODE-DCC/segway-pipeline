@@ -19,16 +19,11 @@ def relabel(
     mnemonics_file_handle: IO[str],
     output_file_handle: IO[str],
 ) -> None:
-    """
-    The first row of the beds is the UCSC track definition line which should not be
-    processed
-    """
     mnemonics = parse_mnemonics(mnemonics_file_handle)
     input_reader = csv.reader(bed_file_handle, delimiter="\t", lineterminator="\n")
     output_writer = csv.writer(
         output_file_handle, delimiter="\t", lineterminator="\n", quotechar="'"
     )
-    output_writer.writerow(next(input_reader))
     for row in input_reader:
         processed = process_row(row, mnemonics)
         output_writer.writerow(processed)

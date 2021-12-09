@@ -222,7 +222,8 @@ task segway_annotate {
             --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
             --no-recursion --null -T - -cf training_params.tar
         gzip -nc training_params.tar > training_params.tar.gz
-        gzip -nc segway.bed > segway.bed.gz
+        tail -n +2 segway.bed > segway_no_header.bed
+        gzip -nc segway_no_header.bed > segway.bed.gz
         find identifydir -print0 |
             LC_ALL=C sort -z |
             tar --owner=0 --group=0 --numeric-owner --mtime='2019-01-01 00:00Z' \
@@ -253,9 +254,9 @@ task bed_to_bigbed {
 
     command <<<
         set -euo pipefail
-        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}_no_header.bed
-        bedToBigBed ~{output_stem}_no_header.bed ~{chrom_sizes} ~{output_stem}.bb
-        gzip -n ~{output_stem}_no_header.bed
+        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}.bed
+        bedToBigBed ~{output_stem}.bed ~{chrom_sizes} ~{output_stem}.bb
+        gzip -n ~{output_stem}.bed
     >>>
 
     output {
