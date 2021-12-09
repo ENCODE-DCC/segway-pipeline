@@ -2,9 +2,9 @@ version 1.0
 
 workflow segway {
     meta {
-        version: "1.0.0"
-        caper_docker: "encodedcc/segway-pipeline:1.0.0"
-        caper_singularity: "docker://encodedcc/segway-pipeline:1.0.0"
+        version: "1.1.0"
+        caper_docker: "encodedcc/segway-pipeline:1.1.0"
+        caper_singularity: "docker://encodedcc/segway-pipeline:1.1.0"
     }
 
     input {
@@ -254,14 +254,13 @@ task bed_to_bigbed {
 
     command <<<
         set -euo pipefail
-        gzip -dc ~{bed} | tail -n +2 > ~{output_stem}.bed
+        gzip -dc ~{bed} > ~{output_stem}.bed
         bedToBigBed ~{output_stem}.bed ~{chrom_sizes} ~{output_stem}.bb
         gzip -n ~{output_stem}.bed
     >>>
 
     output {
         File bigbed = "~{output_stem}.bb"
-        File bed_no_header = "~{output_stem}_no_header.bed.gz"
     }
 }
 
