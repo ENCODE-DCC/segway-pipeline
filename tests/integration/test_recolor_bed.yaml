@@ -8,4 +8,4 @@
       tests/integration/json/test_recolor_bed.json
     files:
       - path: test-output/recolored.bed.gz
-        md5sum: 3d29ce45cb8eeeef7b5d7288d0a94a26
+        md5sum: 7531a866a4666f06f322d05169a5c500
