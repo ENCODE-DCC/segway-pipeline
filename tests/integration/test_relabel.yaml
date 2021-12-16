@@ -8,4 +8,4 @@
       tests/integration/json/test_relabel.json
     files:
       - path: test-output/relabeled.bed.gz
-        md5sum: a5936c83dfe3993333e97abeeb51f1d6
+        md5sum: 836adc36b9a7386148c2060475b80f51

@@ -72,7 +72,7 @@ def recolor_bed(
 
 def process_row(row: List[str], labels_to_colors: Dict[str, Colors]) -> List[str]:
     label = row[3]
-    row[-1] = str(labels_to_colors[label].value)
+    row[-1] = str(labels_to_colors[label.split("_")[-1]].value)
     return row
 
 
