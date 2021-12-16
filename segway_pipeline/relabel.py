@@ -41,7 +41,7 @@ def parse_mnemonics(mnemonics_file_handle: IO[str]) -> Dict[str, str]:
 
 def process_row(row: List[str], mnemonics: Dict[str, str]) -> List[str]:
     label = row[3]
-    row[3] = mnemonics[label]
+    row[3] = "{}_{}".format(label, mnemonics[label])
     return row
 
 

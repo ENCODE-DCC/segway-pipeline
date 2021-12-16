@@ -2,9 +2,9 @@ version 1.0
 
 workflow segway {
     meta {
-        version: "1.1.0"
-        caper_docker: "encodedcc/segway-pipeline:1.1.0"
-        caper_singularity: "docker://encodedcc/segway-pipeline:1.1.0"
+        version: "1.1.1"
+        caper_docker: "encodedcc/segway-pipeline:1.1.1"
+        caper_singularity: "docker://encodedcc/segway-pipeline:1.1.1"
     }
 
     input {
