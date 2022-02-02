@@ -9,6 +9,7 @@ workflow test_interpretation {
         File segment_sizes_tab
         File signal_distribution_tab
         File trackname_assay
+        RuntimeEnvironment runtime_environment
     }
 
     call segway.interpretation { input:
@@ -17,5 +18,6 @@ workflow test_interpretation {
         segment_sizes_tab = segment_sizes_tab,
         signal_distribution_tab = signal_distribution_tab,
         trackname_assay = trackname_assay,
+        runtime_environment = runtime_environment,
     }
 }

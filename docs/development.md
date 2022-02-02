@@ -20,7 +20,7 @@ $ tox -e py37
 
 ### Running WDL tests
 
-Make sure to set the environment variable `SEGWAY_DOCKER_IMAGE_TAG` to point to the pipeline's docker image. Usually `encodedcc/segway-pipeline:template` will suffice, if your code changes require rebuilding then you will need to set this to point to the newly tagged image.
+Make sure to update the input JSON `runtime_environment` to point to the pipeline's docker image. You can use the script [here](../tests/add_runtime_environment_to_input.py) to do this. If your code changes require rebuilding then you will need to set this to point to the newly tagged image.
 
 To run a WDL test with a specific tag:
 

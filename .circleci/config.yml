@@ -58,6 +58,24 @@ commands:
           command: |
             sudo apt-get update && sudo apt-get install -y imagemagick poppler-utils
 
+  add_runtime_environment_to_inputs:
+    description: Add runtime environment to input JSONs
+    steps:
+      - run:
+          command: |
+            for i in tests/unit/json/*.json tests/integration/json/*.json; do
+              python tests/add_runtime_environment_to_input.py $i $SEGWAY_DOCKER_IMAGE_TAG
+            done
+
+  add_docker_to_inputs:
+    description: Add runtime environment to input JSONs
+    steps:
+      - run:
+          command: |
+            for i in tests/functional/json/*.json; do
+              python tests/add_docker_to_input.py $i $SEGWAY_DOCKER_IMAGE_TAG
+            done
+
   install_shellcheck:
     description: Install shellcheck by downloading the binary, don't want to apt-get update
     steps:
@@ -101,6 +119,7 @@ jobs:
       - set_environment_variables
       - install_h5diff
       - install_diff_pdf_visually_dependencies
+      - add_runtime_environment_to_inputs
       - run:
           name: Run pytest-workflow WDL tests using tox
           command: |

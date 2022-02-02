@@ -12,17 +12,12 @@ if [ $# -lt 2 ]; then
     exit 1
 fi
 
-if [ -z "${SEGWAY_DOCKER_IMAGE_TAG}" ]; then
-    echo "Must specify SEGWAY_DOCKER_IMAGE_TAG via environment variable."
-    exit 1
-fi
-
 WDL=$1
 INPUT=$2
 
-echo "Running caper with WDL ${WDL}, input ${INPUT}, and image ${SEGWAY_DOCKER_IMAGE_TAG}"
+echo "Running caper with WDL ${WDL}, input ${INPUT}"
 
-caper run "${WDL}" -i "${INPUT}" --docker "${SEGWAY_DOCKER_IMAGE_TAG}" -o ./tests/pytest_workflow_options.json
+caper run "${WDL}" -i "${INPUT}" -o ./tests/pytest_workflow_options.json
 
 if [[ -f "cromwell.out" ]]; then
     cat cromwell.out

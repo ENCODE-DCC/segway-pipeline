@@ -25,10 +25,10 @@ A pipeline to run [Segway](https://segway.hoffmanlab.org/) and [Segtools](https:
 
 ## Usage
 
-`cd` to the `segway-pipeline` repository cloned in the installation, and run the following:
+To run the test case, `cd` to the `segway-pipeline` repository cloned in the installation, and run the following:
 
 ```bash
-$ caper run segway.wdl -i ${INPUT_JSON} -o workflow_opts/docker.json -b ${BACKEND}
+$ caper run segway.wdl -i tests/functional/json/test_segway_full.json --docker
 ```
 
 ## Input Data

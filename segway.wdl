@@ -1,5 +1,10 @@
 version 1.0
 
+struct RuntimeEnvironment {
+    String docker
+    String singularity
+}
+
 workflow segway {
     meta {
         version: "1.1.1"
@@ -36,6 +41,14 @@ workflow segway {
         File? segway_traindir
         File? segway_output_bed
         File? segway_params
+
+        String docker = "encodedcc/segway-pipeline:1.1.1"
+        String singularity = "docker://encodedcc/segway-pipeline:1.1.1"
+    }
+
+    RuntimeEnvironment runtime_environment = {
+      "docker": docker,
+      "singularity": singularity
     }
 
     Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes)
@@ -44,6 +57,7 @@ workflow segway {
         call make_genomedata { input:
             bigwigs = select_all([bigwigs])[0],
             chrom_sizes = select_all([chrom_sizes])[0],
+            runtime_environment = runtime_environment,
         }
     }
 
@@ -61,6 +75,7 @@ workflow segway {
             max_train_rounds = max_train_rounds,
             num_instances = num_instances,
             ncpus = num_segway_cpus,
+            runtime_environment = runtime_environment,
         }
     }
 
@@ -69,6 +84,7 @@ workflow segway {
             genomedata = select_first([genomedata, make_genomedata.genomedata]),
             traindir = select_first([segway_traindir, segway_train.traindir]),
             ncpus = num_segway_cpus,
+            runtime_environment = runtime_environment,
         }
     }
 
@@ -81,12 +97,14 @@ workflow segway {
         annotation_gtf = annotation_gtf,
         segway_params = segway_params_,
         flank_bases = segtools_aggregation_flank_bases,
+        runtime_environment = runtime_environment,
     }
 
     if (defined(bigwigs) && defined(assays)) {
         call make_trackname_assay { input:
             tracknames = select_first([bigwigs]),
             assays = select_first([assays]),
+            runtime_environment = runtime_environment,
         }
 
         call interpretation { input:
@@ -94,16 +112,19 @@ workflow segway {
             feature_aggregation_tab = segtools.feature_aggregation_tab,
             signal_distribution_tab = segtools.signal_distribution_tab,
             segment_sizes_tab = segtools.segment_sizes_tab,
-            length_distribution_tab = segtools.length_distribution_tab
+            length_distribution_tab = segtools.length_distribution_tab,
+            runtime_environment = runtime_environment,
         }
 
         call relabel { input:
             bed = segway_output_bed_,
             mnemonics = interpretation.mnemonics,
+            runtime_environment = runtime_environment,
         }
 
         call recolor_bed { input:
-            bed = relabel.relabeled_bed
+            bed = relabel.relabeled_bed,
+            runtime_environment = runtime_environment,
         }
 
         if (defined(chrom_sizes)) {
@@ -111,6 +132,7 @@ workflow segway {
                 bed = recolor_bed.recolored_bed,
                 chrom_sizes = select_first([chrom_sizes]),
                 output_stem = "recolored",
+                runtime_environment = runtime_environment,
             }
         }
     }
@@ -120,6 +142,7 @@ task make_genomedata {
     input {
         Array[File] bigwigs
         File chrom_sizes
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -138,6 +161,8 @@ task make_genomedata {
         cpu: 4
         memory: "16 GB"
         disks: "local-disk 500 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -154,6 +179,7 @@ task segway_train {
         Int max_train_rounds
         Int num_instances
         Int ncpus
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -196,6 +222,8 @@ task segway_train {
         cpu: ncpus
         memory: "300 GB"
         disks: "local-disk 1000 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -204,6 +232,7 @@ task segway_annotate {
         File genomedata
         File traindir
         Int ncpus
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -242,6 +271,8 @@ task segway_annotate {
         cpu: ncpus
         memory: "400 GB"
         disks: "local-disk 1000 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -250,6 +281,7 @@ task bed_to_bigbed {
         File bed
         File chrom_sizes
         String output_stem = "segway"
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -262,6 +294,11 @@ task bed_to_bigbed {
     output {
         File bigbed = "~{output_stem}.bb"
     }
+
+    runtime {
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
+    }
 }
 
 task segtools {
@@ -271,6 +308,7 @@ task segtools {
         File annotation_gtf
         File segway_params
         Int flank_bases
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -311,6 +349,8 @@ task segtools {
         cpu: 8
         memory: "16 GB"
         disks: "local-disk 250 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -319,6 +359,7 @@ task make_trackname_assay {
         Array[String] tracknames
         Array[String] assays
         String output_filename = "trackname_assay.txt"
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -338,6 +379,8 @@ task make_trackname_assay {
         cpu: 1
         memory: "2 GB"
         disks: "local-disk 10 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -349,6 +392,7 @@ task interpretation {
         File trackname_assay
         File segment_sizes_tab
         File length_distribution_tab
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -381,6 +425,8 @@ task interpretation {
         cpu: 4
         memory: "16 GB"
         disks: "local-disk 100 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -390,6 +436,7 @@ task relabel {
         File bed
         File mnemonics
         String output_stem = "relabeled"
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -411,6 +458,8 @@ task relabel {
         cpu: 1
         memory: "2 GB"
         disks: "local-disk 20 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
 
@@ -418,6 +467,7 @@ task recolor_bed {
     input {
         File bed
         String output_filename = "recolored.bed"
+        RuntimeEnvironment runtime_environment
     }
 
     command <<<
@@ -435,5 +485,7 @@ task recolor_bed {
         cpu: 1
         memory: "2 GB"
         disks: "local-disk 20 SSD"
+        docker: runtime_environment.docker
+        singularity: runtime_environment.singularity
     }
 }
