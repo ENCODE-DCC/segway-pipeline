@@ -10,6 +10,7 @@ workflow segway {
         version: "1.1.1"
         caper_docker: "encodedcc/segway-pipeline:1.1.1"
         caper_singularity: "docker://encodedcc/segway-pipeline:1.1.1"
+        description: "ENCODE Segway pipeline, see https://github.com/ENCODE-DCC/segway-pipeline for details."
     }
 
     input {

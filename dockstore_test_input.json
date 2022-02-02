@@ -1,0 +1,29 @@
+{
+  "segway.annotation_gtf": "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/gencode.v29.primary_assembly.annotation_UCSC_names_chr19.gtf.gz",
+  "segway.assays": [
+    "H3K36me3",
+    "H3K27me3",
+    "H3K9me3",
+    "H3K4me1",
+    "H3K4me3",
+    "H3K27ac"
+  ],
+  "segway.bigwigs": [
+    "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/ENCFF685ECA_chr19.bw",
+    "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/ENCFF725VID_chr19.bw",
+    "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/ENCFF631FTI_chr19.bw",
+    "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/ENCFF328PXQ_chr19.bw",
+    "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/ENCFF267OQQ_chr19.bw",
+    "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/ENCFF063VLJ_chr19.bw"
+  ],
+  "segway.chrom_sizes": "https://storage.googleapis.com/dockstore_test_input/segway-pipeline/GRCh38_EBV_chr19.chrom.sizes.tsv",
+  "segway.max_train_rounds": 5,
+  "segway.minibatch_fraction": 0.1,
+  "segway.num_instances": 2,
+  "segway.num_labels": 10,
+  "segway.num_segway_cpus": 8,
+  "segway.prior_strength": 1.0,
+  "segway.resolution": 100,
+  "segway.segtools_aggregation_flank_bases": 500,
+  "segway.segtransition_weight_scale": 2.0
+}

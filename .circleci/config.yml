@@ -120,6 +120,7 @@ jobs:
       - install_h5diff
       - install_diff_pdf_visually_dependencies
       - add_runtime_environment_to_inputs
+      - add_docker_to_inputs
       - run:
           name: Run pytest-workflow WDL tests using tox
           command: |
