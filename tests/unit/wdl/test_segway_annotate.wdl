@@ -7,11 +7,13 @@ workflow test_segway_annotate {
         File genomedata
         File traindir
         Int ncpus
+        RuntimeEnvironment runtime_environment
     }
 
     call segway.segway_annotate { input:
         genomedata = genomedata,
         traindir = traindir,
         ncpus = ncpus,
+        runtime_environment = runtime_environment,
     }
 }

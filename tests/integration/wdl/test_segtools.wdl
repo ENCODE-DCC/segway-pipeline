@@ -9,6 +9,7 @@ workflow test_segtools {
         File annotation_gtf
         File segway_params
         Int flank_bases
+        RuntimeEnvironment runtime_environment
     }
 
     call segway.segtools { input:
@@ -17,5 +18,6 @@ workflow test_segtools {
         annotation_gtf = annotation_gtf,
         segway_params = segway_params,
         flank_bases = flank_bases,
+        runtime_environment = runtime_environment,
     }
 }

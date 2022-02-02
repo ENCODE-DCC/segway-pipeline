@@ -15,6 +15,7 @@ workflow test_segway_train {
         Float segtransition_weight_scale
         Int ruler_scale
         Float track_weight
+        RuntimeEnvironment runtime_environment
     }
 
     call segway.segway_train { input:
@@ -29,5 +30,6 @@ workflow test_segway_train {
         segtransition_weight_scale = segtransition_weight_scale,
         ruler_scale = ruler_scale,
         track_weight = track_weight,
+        runtime_environment = runtime_environment,
     }
 }
