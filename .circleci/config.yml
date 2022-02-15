@@ -124,7 +124,7 @@ jobs:
       - run:
           name: Run pytest-workflow WDL tests using tox
           command: |
-            pyenv versions
+            pyenv install 3.7.0
             pyenv global 3.7.0
             pip install --upgrade pip
             pip install tox
