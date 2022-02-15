@@ -6,7 +6,7 @@ defaults: &defaults
 
 machine_defaults: &machine_defaults
   machine:
-    image: ubuntu-1604:201903-01
+    image: ubuntu-2004:202201-02
   working_directory: ~/ENCODE-DCC/segway-pipeline
 
 py37: &py37
