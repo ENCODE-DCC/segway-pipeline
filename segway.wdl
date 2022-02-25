@@ -16,8 +16,8 @@ workflow segway {
     input {
         # Pipeline inputs to run from beginning
         Array[File]? bigwigs
-        Array[String]? assays
-        File? chrom_sizes
+        Array[String] assays
+        File chrom_sizes
         File annotation_gtf
 
         # Segway resource parameter
@@ -36,12 +36,13 @@ workflow segway {
         # Segtools parameters
         Int segtools_aggregation_flank_bases = 10000
 
-        # Optional inputs for starting the pipeline not from the beginning
-        File? genomedata
-        Int? num_labels
-        File? segway_traindir
+        # Optional inputs for reinterpretation
         File? segway_output_bed
-        File? segway_params
+        Array[String]? tracknames
+        File? feature_aggregation_tab
+        File? signal_distribution_tab
+        File? segment_sizes_tab
+        File? length_distribution_tab
 
         String docker = "encodedcc/segway-pipeline:1.1.1"
         String singularity = "docker://encodedcc/segway-pipeline:1.1.1"
@@ -52,21 +53,16 @@ workflow segway {
       "singularity": singularity
     }
 
-    Boolean has_make_genomedata_input = defined(bigwigs) && defined(chrom_sizes)
-    Boolean has_segtools_input = defined(segway_output_bed) && defined(segway_params) && defined(genomedata)
-    if (!defined(genomedata) && !has_segtools_input && has_make_genomedata_input) {
+    if (!defined(segway_output_bed)) {
         call make_genomedata { input:
             bigwigs = select_all([bigwigs])[0],
-            chrom_sizes = select_all([chrom_sizes])[0],
+            chrom_sizes = chrom_sizes,
             runtime_environment = runtime_environment,
         }
-    }
 
-    # We can skip training if we have a traindir or if we just need to run segtools
-    if (!defined(segway_traindir) && !has_segtools_input) {
         call segway_train { input:
-            genomedata = select_first([genomedata, make_genomedata.genomedata]),
-            num_labels = select_first([num_labels, make_genomedata.num_labels]),
+            genomedata = make_genomedata.genomedata,
+            num_labels = make_genomedata.num_labels,
             resolution = resolution,
             prior_strength = prior_strength,
             segtransition_weight_scale = segtransition_weight_scale,
@@ -78,33 +74,26 @@ workflow segway {
             ncpus = num_segway_cpus,
             runtime_environment = runtime_environment,
         }
-    }
 
-    if (!has_segtools_input) {
         call segway_annotate { input:
-            genomedata = select_first([genomedata, make_genomedata.genomedata]),
-            traindir = select_first([segway_traindir, segway_train.traindir]),
+            genomedata = make_genomedata.genomedata,
+            traindir = segway_train.traindir,
             ncpus = num_segway_cpus,
             runtime_environment = runtime_environment,
         }
-    }
 
-    File segway_output_bed_ = select_first([segway_output_bed, segway_annotate.output_bed])
-    File segway_params_ = select_first([segway_params, segway_annotate.segway_params])
+        call segtools { input:
+            genomedata = make_genomedata.genomedata,
+            segway_output_bed = segway_annotate.output_bed,
+            annotation_gtf = annotation_gtf,
+            segway_params = segway_annotate.segway_params,
+            flank_bases = segtools_aggregation_flank_bases,
+            runtime_environment = runtime_environment,
+        }
 
-    call segtools { input:
-        genomedata = select_first([genomedata, make_genomedata.genomedata]),
-        segway_output_bed = segway_output_bed_,
-        annotation_gtf = annotation_gtf,
-        segway_params = segway_params_,
-        flank_bases = segtools_aggregation_flank_bases,
-        runtime_environment = runtime_environment,
-    }
-
-    if (defined(bigwigs) && defined(assays)) {
         call make_trackname_assay { input:
             tracknames = select_first([bigwigs]),
-            assays = select_first([assays]),
+            assays = assays,
             runtime_environment = runtime_environment,
         }
 
@@ -116,25 +105,45 @@ workflow segway {
             length_distribution_tab = segtools.length_distribution_tab,
             runtime_environment = runtime_environment,
         }
+    }
 
-        call relabel { input:
-            bed = segway_output_bed_,
-            mnemonics = interpretation.mnemonics,
+    if (defined(segway_output_bed)) {
+        call make_trackname_assay as make_trackname_assay_from_strings { input:
+            tracknames = select_first([tracknames]),
+            assays = assays,
             runtime_environment = runtime_environment,
         }
 
-        call recolor_bed { input:
-            bed = relabel.relabeled_bed,
+        call interpretation as interpret_existing_bed { input:
+            trackname_assay = make_trackname_assay_from_strings.trackname_assay,
+            feature_aggregation_tab = select_first([feature_aggregation_tab]),
+            signal_distribution_tab = select_first([signal_distribution_tab]),
+            segment_sizes_tab = select_first([segment_sizes_tab]),
+            length_distribution_tab = select_first([length_distribution_tab]),
             runtime_environment = runtime_environment,
         }
+    }
 
-        if (defined(chrom_sizes)) {
-            call bed_to_bigbed as recolored_bed_to_bigbed { input:
-                bed = recolor_bed.recolored_bed,
-                chrom_sizes = select_first([chrom_sizes]),
-                output_stem = "recolored",
-                runtime_environment = runtime_environment,
-            }
+    File segway_output_bed_ = select_first([segway_output_bed, segway_annotate.output_bed])
+    File mnemonics = select_first([interpretation.mnemonics, interpret_existing_bed.mnemonics])
+
+    call relabel { input:
+        bed = segway_output_bed_,
+        mnemonics = mnemonics,
+        runtime_environment = runtime_environment,
+    }
+
+    call recolor_bed { input:
+        bed = relabel.relabeled_bed,
+        runtime_environment = runtime_environment,
+    }
+
+    if (defined(chrom_sizes)) {
+        call bed_to_bigbed as recolored_bed_to_bigbed { input:
+            bed = recolor_bed.recolored_bed,
+            chrom_sizes = chrom_sizes,
+            output_stem = "recolored",
+            runtime_environment = runtime_environment,
         }
     }
 }
