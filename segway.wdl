@@ -28,6 +28,7 @@ workflow segway {
         Float minibatch_fraction = 0.01
         Int max_train_rounds = 25
         Int num_instances = 10
+        Int? num_labels
         Float prior_strength = 1.0
         Float segtransition_weight_scale = 1.0
         Float track_weight = 0.01
@@ -62,7 +63,7 @@ workflow segway {
 
         call segway_train { input:
             genomedata = make_genomedata.genomedata,
-            num_labels = make_genomedata.num_labels,
+            num_labels = select_first([num_labels, make_genomedata.num_labels]),
             resolution = resolution,
             prior_strength = prior_strength,
             segtransition_weight_scale = segtransition_weight_scale,
