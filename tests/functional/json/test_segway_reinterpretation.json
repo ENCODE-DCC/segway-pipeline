@@ -1,0 +1,27 @@
+{
+  "segway.annotation_gtf": "tests/data/gencode.v29.primary_assembly.annotation_UCSC_names_chr19.gtf.gz",
+  "segway.assays": [
+    "H3K9me3",
+    "H3K4me3",
+    "H3K4me1",
+    "H3K27ac",
+    "CTCF",
+    "H3K27me3",
+    "H3K36me3"
+  ],
+  "segway.chrom_sizes": "tests/data/GRCh38_EBV_chr19.chrom.sizes.tsv",
+  "segway.feature_aggregation_tab": "tests/data/feature_aggregation.tab",
+  "segway.length_distribution_tab": "tests/data/length_distribution.tab",
+  "segway.segment_sizes_tab": "tests/data/segment_sizes.tab",
+  "segway.segway_output_bed": "tests/data/segway.bed.gz",
+  "segway.signal_distribution_tab": "tests/data/signal_distribution.tab",
+  "segway.tracknames": [
+    "ENCFF102KZF",
+    "ENCFF175MYS",
+    "ENCFF208WVK",
+    "ENCFF341LLL",
+    "ENCFF398MEO",
+    "ENCFF511WTH",
+    "ENCFF604LIV"
+  ]
+}

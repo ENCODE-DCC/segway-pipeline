@@ -1,0 +1,38 @@
+---
+  - name: test_segway_reinterpretation
+    tags:
+      - functional
+    command: >-
+      tests/caper_run.sh
+      segway.wdl
+      tests/functional/json/test_segway_reinterpretation.json
+    files:
+      - path: test-output/files.genomedata
+      - path: test-output/traindir.tar.gz
+      - path: test-output/training_params.tar.gz
+      - path: test-output/segway.bed.gz
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.tab
+        md5sum: 564341c83a33364b5d24452b9419f162
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/length_distribution.pdf
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.tab
+        md5sum: 58c2ffcc70f0ffa78e9218bd4e328762
+      - path: test-output/glob-a287da44f32bf6a3fc6d7c51c52ddafa/segment_sizes.pdf
+      - path: test-output/glob-03b7332b8fdb9a1ca33a23093d5878d5/gmtk_parameters.pdf
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.div
+        md5sum: 6bdc458f8fe22e2be265a525a31fefa6
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.splicing.pdf
+      - path: test-output/feature_aggregation/feature_aggregation.tab
+        md5sum: aa2234f85cd91870cff23cb4eeb441e9
+      - path: test-output/glob-9a503dc39dbe819d5ebf7343f90bb109/feature_aggregation.translation.pdf
+      - path: test-output/signal_distribution/signal_distribution.tab
+        md5sum: b0a5fd51a8e786b94bbe25f34ee33099
+      - path: test-output/interpretation-output/classification/sample/mnemonics.txt
+        md5sum: 7b322fd468c54559e5febca8dfa51a51
+      - path: test-output/interpretation-output/classification/sample/classifier_data.tab
+        md5sum: 8bf2c54d7bbd0ce89314ec0c0c557025
+      - path: test-output/interpretation-output/classification/sample/probs.txt
+        md5sum: 1ceceac7d7e49bee6c01509795750305
+      - path: test-output/relabeled.bed.gz
+      - path: test-output/recolored.bed.gz
+      - path: test-output/recolored.bb
+        md5sum: 2a02ef85459176521b3e0fda679ffa25
