@@ -10,4 +10,4 @@
       - path: test-output/relabeled.bed.gz
       - path: test-output/recolored.bed.gz
       - path: test-output/recolored.bb
-        md5sum: 2a02ef85459176521b3e0fda679ffa25
+        md5sum: c17dcd467856417debcde5f8a0ec7f8b
