@@ -1,0 +1,13 @@
+---
+  - name: test_segway_reinterpretation
+    tags:
+      - functional
+    command: >-
+      tests/caper_run.sh
+      segway.wdl
+      tests/functional/json/test_segway_reinterpretation.json
+    files:
+      - path: test-output/relabeled.bed.gz
+      - path: test-output/recolored.bed.gz
+      - path: test-output/recolored.bb
+        md5sum: c17dcd467856417debcde5f8a0ec7f8b

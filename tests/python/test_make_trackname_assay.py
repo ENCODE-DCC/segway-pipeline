@@ -13,6 +13,13 @@ def test_make_trackname_assay():
     assert result == [("foo", "H3K27ac"), ("bar", "H3K4me3")]
 
 
+def test_make_trackname_bare_trackname():
+    tracknames = ["foo", "bar"]
+    assays = ["H3K27ac", "H3K4me3"]
+    result = make_trackname_assay(tracknames, assays)
+    assert result == [("foo", "H3K27ac"), ("bar", "H3K4me3")]
+
+
 def test_write_trackname_assay():
     file_handle = StringIO("w", newline="")
     trackname_assay = [("foo", "assay1"), ("bar", "assay2")]
