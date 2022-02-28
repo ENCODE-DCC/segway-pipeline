@@ -7,9 +7,9 @@ struct RuntimeEnvironment {
 
 workflow segway {
     meta {
-        version: "1.1.1"
-        caper_docker: "encodedcc/segway-pipeline:1.1.1"
-        caper_singularity: "docker://encodedcc/segway-pipeline:1.1.1"
+        version: "1.2.0"
+        caper_docker: "encodedcc/segway-pipeline:1.2.0"
+        caper_singularity: "docker://encodedcc/segway-pipeline:1.2.0"
         description: "ENCODE Segway pipeline, see https://github.com/ENCODE-DCC/segway-pipeline for details."
     }
 
@@ -45,8 +45,8 @@ workflow segway {
         File? segment_sizes_tab
         File? length_distribution_tab
 
-        String docker = "encodedcc/segway-pipeline:1.1.1"
-        String singularity = "docker://encodedcc/segway-pipeline:1.1.1"
+        String docker = "encodedcc/segway-pipeline:1.2.0"
+        String singularity = "docker://encodedcc/segway-pipeline:1.2.0"
     }
 
     RuntimeEnvironment runtime_environment = {
