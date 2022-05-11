@@ -1,0 +1,57 @@
+{
+    "segway.make_genomedata":{
+        "genomedata": {
+            "table": "genomedata from task make_genomedata"
+        }
+    },
+    "segway.segway_train": {
+        "traindir": {
+            "table": "segwayTrain tar file from task segway_train"
+        }
+    },
+    "segway.segway_annotate": {
+        "output_bed": {
+            "table": "segway annotate bed file from task segway_annotate"
+        }
+    },
+    "segway.bed_to_bigbed": {
+        "bigbed": {
+            "table": "segway bigbed file from task bed_to_bigbed"
+        }
+    },
+    "segway.segtools": {
+        "length_distribution_tab": {
+            "table": "length distribution from segtools"
+        },
+        "segment_sizes_tab":{
+            "table": "segment sizes from segtools"
+        },
+        "feature_aggregation_tab":{
+             "table": "feature aggregation from segtools"
+        },
+        "signal_distribution_tab":{
+            "table": "signal distribution from segtools"
+        }
+    },
+    "segway.interpretation":{
+        "stats":{
+            "table": "stats files from interpretation"
+        },
+        "memonics":{
+            "table": "memonics txt file from interpretation"
+        },
+        "classifier_probailities":{
+            "table": "classifier probailities from interpretation"
+        }
+    },
+    "segway.relabel":{
+        "relabeled_bed": {
+            "table": "relabelled bed"
+        }
+    },
+    "segway.recolor_bed": {
+        "recolored_bed": {
+            "table": "recolored bed"
+        }
+    }
+}
