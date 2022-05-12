@@ -7,9 +7,18 @@
     "segway.segway_train": {
         "traindir": {
             "table": "segwayTrain tar file from task segway_train"
+        },
+        "trained_params": {
+            "table": "params file from task segway_train"
         }
     },
     "segway.segway_annotate": {
+        "segway_params": {
+            "table": "params from segway_annotate"
+        },
+        "identifydir": {
+            "table": "identifydir tar file from segway_annotate"
+        },
         "output_bed": {
             "table": "segway annotate bed file from task segway_annotate"
         }
@@ -20,17 +29,34 @@
         }
     },
     "segway.segtools": {
+        "length_distribution_info":{
+            "table": "length distribution info from segtools"
+        },
         "length_distribution_tab": {
             "table": "length distribution from segtools"
         },
         "segment_sizes_tab":{
             "table": "segment sizes from segtools"
         },
-        "feature_aggregation_tab":{
+        "gmtk_info": {
+            "table": "gmtk parameters info from segtools"
+        }
+        "feature_aggregation_info": {
+            "table": "feature aggregation info from segtools"
+        },
+        "feature_aggregation_tab": {
              "table": "feature aggregation from segtools"
         },
-        "signal_distribution_tab":{
+        "signal_distribution_info": {
+            "table": "signal distribution files from segtools"
+        },
+        "signal_distribution_tab": {
             "table": "signal distribution from segtools"
+        }
+    },
+    "segway.make_trackname_assay":{
+        "trackname_assay":{
+            "table": "trackname assay from make trackname assay"
         }
     },
     "segway.interpretation":{
@@ -40,13 +66,16 @@
         "memonics":{
             "table": "memonics txt file from interpretation"
         },
+        "classifier_data": {
+            "table": "calssifier data from interpretation"
+        },
         "classifier_probailities":{
             "table": "classifier probailities from interpretation"
         }
     },
     "segway.relabel":{
         "relabeled_bed": {
-            "table": "relabelled bed"
+            "table": "relabeled bed"
         }
     },
     "segway.recolor_bed": {
