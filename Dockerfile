@@ -51,7 +51,7 @@ WORKDIR /opt
 RUN git clone https://github.com/marjanfarahbod/interpretation_samples.git && \
     chmod a+w interpretation_samples && \
     cd interpretation_samples && \
-    git checkout aa425f56a9f671114b7a09fb35d9c3e85d40c41b && \
+    git checkout 79818e0b929e17cfc0175c23430b710524fa7627 && \
     rm -rf segwayOutput testworkdir && \
     chmod a+x apply_samples.py
 

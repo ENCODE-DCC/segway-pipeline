@@ -421,7 +421,7 @@ task interpretation {
         python \
             "$(which apply_samples.py)" \
             interpretation-output \
-            --model-path /opt/interpretation_samples/model.pickle.gz \
+            --model-path /opt/interpretation_samples/model_300_reg.020_auc0.89V04.pickle.gz \
             --input-path "${PWD}/${SEGWAY_OUTPUT}"
     >>>
 
