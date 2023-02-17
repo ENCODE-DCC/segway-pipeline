@@ -25,7 +25,10 @@ class Colors(Enum):
 
     DARK_KHAKI = Rgb(189, 183, 107)
     GREEN = Rgb(0, 128, 0)
+    GREEN_YELLOW = Rgb(196, 225, 5)
+    MEDIUM_AQUAMARINE = Rgb(102, 205, 170)
     ORANGE = Rgb(255, 195, 77)
+    ORANGE_RED = Rgb(255, 68, 0)
     PALE_TURQUOISE = Rgb(138, 145, 208)
     PURPLE = Rgb(128, 0, 128)
     RED = Rgb(255, 0, 0)
@@ -37,10 +40,14 @@ class Colors(Enum):
 LABELS_TO_COLORS = {
     "Bivalent": Colors.DARK_KHAKI,  # bivalent enhancer and bivalent TSS
     "ConstitutiveHet": Colors.PALE_TURQUOISE,  # heterochromatin
+    "CTCF": Colors.GREEN_YELLOW
     "Enhancer": Colors.ORANGE,  # active enhancer
+    "EnhancerLow": Colors.YELLOW,
     "FacultativeHet": Colors.PURPLE,  # polycomb repressed
+    "K9K36": Colors.MEDIUM_AQUAMARINE,
     "LowConfidence": Colors.SILVER,  # no chromhmm equivalent
     "Promoter": Colors.RED,  # Active TSS
+    "PromoterFlanking": Colors.ORANGE_RED,
     "Quiescent": Colors.WHITE,  # same as chromhmm
     "RegPermissive": Colors.YELLOW,  # weak enhancer
     "Transcribed": Colors.GREEN,  # strong transcription
