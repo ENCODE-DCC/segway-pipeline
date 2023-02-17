@@ -40,7 +40,7 @@ class Colors(Enum):
 LABELS_TO_COLORS = {
     "Bivalent": Colors.DARK_KHAKI,  # bivalent enhancer and bivalent TSS
     "ConstitutiveHet": Colors.PALE_TURQUOISE,  # heterochromatin
-    "CTCF": Colors.GREEN_YELLOW
+    "CTCF": Colors.GREEN_YELLOW,
     "Enhancer": Colors.ORANGE,  # active enhancer
     "EnhancerLow": Colors.YELLOW,
     "FacultativeHet": Colors.PURPLE,  # polycomb repressed
